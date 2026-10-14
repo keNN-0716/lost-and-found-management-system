@@ -103,6 +103,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'LostAndFound.backends.IDNumberAuthBackend',  # Custom backend for ID number authentication
+    'django.contrib.auth.backends.ModelBackend',  # Default backend for username/password authentication
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

@@ -5,53 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Lost & Found</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .container { max-width: 400px; width: 100%; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box; }
-        h2 { margin-top: 0; color: #2c3e50; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn { background-color: #3498db; color: white; padding: 10px; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .btn:hover { background-color: #2980b9; }
-        .error-msg { color: #e74c3c; background: #fde8e8; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; text-align: center; }
-        .switch-link { text-align: center; margin-top: 15px; font-size: 14px; }
-        .switch-link a { color: #3498db; text-decoration: none; }
-        .switch-link a:hover { text-decoration: underline; }
+        /* Simple, Clean Reset & Centered Layout */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Card Container Design */
+        .login-card {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+            color: #333333;
+            text-align: center;
+        }
+
+        p {
+            color: #666666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Error Banner */
+        .error-alert {
+            background-color: #fde8e8;
+            color: #e53e3e;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #fbd5d5;
+        }
+
+        /* Form Controls Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        label {
+            font-weight: 6px;
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* Targets text and password boxes rendered by Django */
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #3182ce;
+        }
+
+        /* Submit Button Action */
+        button[type="submit"] {
+            background-color: #3182ce;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2b6cb0;
+        }
+
+        /* Footer Link Context */
+        .footer-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .footer-link a {
+            color: #3182ce;
+            text-decoration: none;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Django field generic error items */
+        .field-errors {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Log In</h2>
-    <p>Access the Lost & Found Portal</p>
+    <div class="login-card">
+        <h2>Log In</h2>
+        <p>Access the Lost & Found Portal</p>
 
-    <!-- Displays backend error messages -->
-    {% if error %}
-        <div class="error-msg">
-            {{ error }}
+        {% if error_message %}
+            <div class="error-alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %} 
+            
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }} 
+                    
+                    {% if field.errors %} 
+                        <div class="field-errors">
+                            {{ field.errors|striptags }}
+                        </div> 
+                    {% endif %}
+                </div>
+            {% endfor %} 
+            
+            <button type="submit">Log In</button>
+        </form>
+
+        <div class="footer-link">
+            Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
         </div>
-    {% endif %}
-
-    <form method="POST" action="{% url 'login' %}">
-        {% csrf_token %} <!-- Required for Django Security -->
-        
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required placeholder="Enter username">
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required placeholder="Enter password">
-        </div>
-
-        <button type="submit" class="btn">Log In</button>
-    </form>
-
-    <div class="switch-link">
-        Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
     </div>
-</div>
 
 </body>
 </html>
