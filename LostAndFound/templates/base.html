@@ -4,11 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Lost and Found</title>
 </head>
 <body>
-    <h2>Lost and Found Management System</h2>
-    <p>Welcome to the Lost and Found page!</p>
+    <nav>
+        <ul>
+            <li><a href="{% url 'lost_and_found' %}">Home</a></li>
+            <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
+            <li><a href="{% url 'found_items' %}">Found Items</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <h2>Lost and Found Management System</h2>
+        <p>Welcome to the Lost and Found page!</p>
+    </div>
+
     <main>
         {% block content %}
         {% endblock %}

@@ -1,0 +1,28 @@
+/* Default Styles */
+body {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 10px;
+    padding: 5px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+/* Left-Side Navigation */
+nav {
+    background-color: #f2f2f2;
+    padding: 10px;
+    width: 200px;
+    float: left; /* Align to the left */
+    height: 90vh; /* Full height */
+    border-radius: 25px;
+}
+/* Navigation List */
+nav ul {
+    list-style-type: none;
+    padding: 10px;
+}
+/* Navigation Links */
+nav ul li a {
+    text-decoration: none;
+    color: #333;
+}
