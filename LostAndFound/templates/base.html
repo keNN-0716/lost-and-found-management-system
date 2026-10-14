@@ -8,15 +8,22 @@
     <title>Lost and Found</title>
 </head>
 <body>
-    <nav>
+    <nav class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">✖ Close</button>
         <ul>
+            <h4>Navigation</h4>
             <li><a href="{% url 'lost_and_found' %}">Home</a></li>
             <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
             <li><a href="{% url 'found_items' %}">Found Items</a></li>
+            <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Log Out</button>
+            </form>
         </ul>
     </nav>
 
     <div class="header">
+        <button class="menu-toggle" id="menuToggle">☰ Menu</button>
         <h2>Lost and Found Management System</h2>
         <p>Welcome to the Lost and Found page!</p>
     </div>
@@ -25,5 +32,11 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <footer>
+        <p>&copy; 2026 Lost and Found Management System</p>
+    </footer>
+
+    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>

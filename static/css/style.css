@@ -7,22 +7,105 @@ body {
     justify-content: center;
     text-align: center;
 }
+/* Hidden Menu by Default */
+.hidden {
+    display: none !important;
+}
+/* Header Styles */
+.header {
+    background-color: #dddddd;
+    padding: 20px;
+    border-radius: 25px;
+    margin-bottom: 20px;
+}
+/* Menu Toggle Button */
+.menu-toggle {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    background-color: #dddddd;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    z-index: 1001; /* Ensure it is above the side menu */
+}
+/* Close Menu Button */
+.close-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #c8c8c8;
+    border: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
 /* Left-Side Navigation */
-nav {
-    background-color: #f2f2f2;
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #dddddd;
     padding: 10px;
     width: 200px;
-    float: left; /* Align to the left */
     height: 90vh; /* Full height */
-    border-radius: 25px;
+    margin-bottom: 20px;
+    float: left; /* Align to the left */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out; 
+    z-index: 1000;
+}
+/* Clean custom styling for the logout action button */
+    .logout-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .logout-btn:hover {
+        background-color: #c0392b;
+    }
+/* Open State for Side Menu */
+.side-menu.open {
+    transform: translateX(0);
 }
 /* Navigation List */
-nav ul {
+.side-menu ul {
     list-style-type: none;
     padding: 10px;
 }
 /* Navigation Links */
-nav ul li a {
+.side-menu ul li a {
+    display: block;
+    margin-bottom: 15px;
     text-decoration: none;
     color: #333;
+    background-color: #c5c5c5;
+    border-radius: 25px;
+    padding: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+/* Navigation Links Hover Effect */
+.side-menu ul li a:hover {
+    background-color: #999999;
+    transform: scale(1.10);
+}
+/* Footer Styles */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #dddddd;
+    padding: 10px;
+    text-align: center;
 }
