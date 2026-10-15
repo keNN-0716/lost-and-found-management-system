@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm 
+from .models import CustomUser 
 
 class CustomLoginForm(forms.Form):
     id_number = forms.CharField(
@@ -17,19 +19,11 @@ class CustomLoginForm(forms.Form):
             'placeholder': 'Enter your password'})
     )
 
-class CustomSignupForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Create a password'}))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm your password'}))
+class CustomSignupForm(UserCreationForm):
 
-    class Meta:
-        model = User
-        fields = ['username', 'email']  # ID number is completely hidden here
-
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if password != confirm_password:
-            raise forms.ValidationError("Passwords do not match.")
-        return cleaned_data
+    class Meta(UserCreationForm.Meta):
+        # 1. Point the form explicitly to your CustomUser model
+        model = CustomUser
+        
+        # 2. Add your custom field to the registration form fields
+        fields = UserCreationForm.Meta.fields

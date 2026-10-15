@@ -1,16 +1,22 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import CustomUser
 
-# Register your models here.
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    can_delete = False
-    verbose_name_plural = 'Profile'
-
-class UserAdmin(BaseUserAdmin):
-    inlines = (UserProfileInline,)
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('username', 'email', 'id_number', 'role', 'is_staff')
+    list_filter = ('role', 'is_staff', 'is_superuser')
     
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ('Custom Profile Information', {
+            'fields': ('id_number', 'role'),
+        }),
+    )
+    
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        ('Custom Profile Information', {
+            'fields': ('id_number', 'role'),
+        }),
+    )
+
+# Only register CustomUser. Remove the old User registrations entirely.
+admin.site.register(CustomUser, CustomUserAdmin)

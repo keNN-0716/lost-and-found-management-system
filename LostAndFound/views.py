@@ -24,12 +24,8 @@ def signup_view(request):
     if request.method == 'POST':
         form = CustomSignupForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()  # Triggers the profile row creation in DB
-            
-            # FIXED: Explicitly specify your custom ID backend for session consistency 
-            return redirect('login')  # Redirect to login page after successful signup
+            form.save()  
+            return redirect('login') 
     else:
         form = CustomSignupForm()
         

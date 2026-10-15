@@ -105,9 +105,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'LostAndFound.backends.IDNumberAuthBackend',  # Custom backend for ID number authentication
-    'django.contrib.auth.backends.ModelBackend',  # Default backend for username/password authentication
+    'LostAndFound.backends.IDNumberAuthBackend',  
+    'django.contrib.auth.backends.ModelBackend', 
 ]
+
+
 
 
 # Internationalization
@@ -140,3 +142,5 @@ LOGIN_URL = 'login'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+AUTH_USER_MODEL = 'LostAndFound.CustomUser'
