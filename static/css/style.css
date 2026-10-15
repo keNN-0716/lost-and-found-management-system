@@ -101,11 +101,10 @@ body {
 }
 /* Container & Layout */
 .lost-items-container {
-    max-width: 1200px !important; /* Widened layout container to fit multiple items per row */
     display: flex;
-    flex-wrap: wrap;        /* Allows items to break into multiple rows */
-    gap: 20px;              /* Spacing between the row cards */
-    justify-content: center;/* Centers cards on the page */
+    flex-wrap: wrap;      
+    gap: 20px;              
+    justify-content: center;
 }
 
 .page-header {
