@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CustomLoginForm, CustomSignupForm
-# Cleaned up unnecessary imports (Removed UserCreationForm and duplicate forms import)
+from .models import LostItem
 
 # Sign up page for lost and found
 def signup_view(request):
@@ -50,15 +50,36 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+# Lost items page for lost and found
+@login_required
+def lost_items(request):
+    # 1. Handle Form Submission (Manager uploads an item)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        date_lost = request.POST.get('date_lost')
+        location_lost = request.POST.get('location_lost')
+        image = request.FILES.get('image')  # Handle image upload
+        
+        # Save the new item to the database
+        LostItem.objects.create(
+            name=name,
+            description=description,
+            date_lost=date_lost,
+            location_lost=location_lost,
+            image=image  # Save the uploaded image
+        )
+        # Redirect back to the same page to prevent double-submitting on refresh
+        return redirect('lost_items') 
+
+    # 2. Handle Page Display (Fetch items from newest to oldest)
+    lost_items = LostItem.objects.all().order_by('-created_at')
+    
+    return render(request, 'lost_items.html', {'lost_items': lost_items})
 # Home page for lost and found
 @login_required
 def lost_and_found(request):
     return render(request, 'lost_and_found.html')
-
-# Lost items page
-@login_required # Pro-Tip: Added protection so non-logged-in users can't view these pages
-def lost_items(request):
-    return render(request, 'lost_items.html')
 
 # Found items page
 @login_required # Pro-Tip: Added protection here too

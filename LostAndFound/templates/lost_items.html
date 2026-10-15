@@ -1,4 +1,82 @@
 {% extends 'base.html' %}
 {% block content %}
-    
+   <div class="lost-items-container">
+
+    <div class="page-header">
+        <h2 class="section-title">Current Lost Items</h2>
+        <button id="openModalBtn" class="action-btn upload-trigger-btn">Report Lost Item</button>
+    </div>
+    <hr class="divider">
+
+    <!-- MODAL OVERLAY -->
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Manager Portal: Upload Lost Item</h3>
+                <span id="closeModalBtn" class="close-x">&times;</span>
+            </div>
+            
+            <!-- CRITICAL CRITERIA: Added enctype for handling file streams -->
+            <form method="POST" action="{% url 'lost_items' %}" enctype="multipart/form-data" class="modal-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">Item Name:</label>
+                    <input type="text" name="name" required class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Location Lost:</label>
+                    <input type="text" name="location_lost" required class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date Lost:</label>
+                    <input type="date" name="date_lost" required class="form-input">
+                </div>
+
+                <!-- NEW: File Upload Selector Field -->
+                <div class="form-group">
+                    <label class="form-label">Item Image:</label>
+                    <input type="file" name="image" accept="image/*" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description:</label>
+                    <textarea name="description" rows="3" required class="form-textarea"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelModalBtn" class="action-btn cancel-btn">Cancel</button>
+                    <button type="submit" class="action-btn submit-btn">Upload Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOST ITEMS DISPLAY LIST -->
+    <div class="items-list">
+        {% for item in lost_items %}
+        <div class="item-card">
+            <!-- New: Left image side panel layout logic -->
+            {% if item.image %}
+                <div class="item-image-wrapper">
+                    <img class="item-preview-img" src="{{ item.image.url }}" alt="{{ item.name }}">
+                </div>
+            {% endif %}
+            
+            <div class="item-details-wrapper">
+                <h3 class="item-name">{{ item.name }}</h3>
+                <p class="item-desc"><strong>Description:</strong> {{ item.description }}</p>
+                <p class="item-meta">
+                    <strong>Date Lost:</strong> {{ item.date_lost }} | <strong>Location:</strong> {{ item.location_lost }}
+                </p>
+            </div>
+        </div>
+        {% empty %}
+        <p class="empty-message">No lost items found.</p>
+        {% endfor %}
+    </div>
+
+</div>
 {% endblock %}
