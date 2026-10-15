@@ -3,8 +3,22 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CustomLoginForm, CustomSignupForm
+from django.db.models import Q
 from .models import LostItem
 
+# Search backend for lost and found
+def search_results(request):
+    query = request.GET.get('q', '').strip() # Clean trailing spaces
+    results = []
+    
+    if query:
+        results = LostItem.objects.filter(
+            Q(name__icontains=query) | 
+            Q(description__icontains=query) | 
+            Q(location_lost__icontains=query)
+        ).order_by('-created_at')
+        
+    return render(request, 'search_results.html', {'results': results, 'query': query})
 # Sign up page for lost and found
 def signup_view(request):
     if request.method == 'POST':

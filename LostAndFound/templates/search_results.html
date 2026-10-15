@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- This container now aligns children into multi-row layers -->
+<div class="lost-items-container">
+    <div class="page-header" style="width: 100%;"> <!-- Spans full width above rows -->
+        <h2 class="section-title">Search Results for: "{{ query }}"</h2>
+    </div>
+    <hr class="divider" style="width: 100%;">
+
+    {% if results %}
+        {% for item in results %}
+            <div class="item-card">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-preview-img">
+                {% endif %}
+                
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <p class="item-desc"><strong>Description:</strong> {{ item.description }}</p>
+                    <p class="item-meta"><strong>Location:</strong> {{ item.location_lost }}</p>
+                    {% if item.date_lost %}
+                        <p class="item-meta"><strong>Date Lost:</strong> {{ item.date_lost }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message" style="width: 100%;">No results found matching your criteria.</p>
+    {% endif %}
+</div>
+{% endblock %}
