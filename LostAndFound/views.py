@@ -14,9 +14,8 @@ def signup_view(request):
             user.set_password(form.cleaned_data['password'])
             user.save()  # Triggers the profile row creation in DB
             
-            # FIXED: Explicitly specify your custom ID backend for session consistency
-            login(request, user, backend='LostAndFound.backends.IDNumberAuthBackend') 
-            return redirect('lost_and_found')
+            # FIXED: Explicitly specify your custom ID backend for session consistency 
+            return redirect('login')  # Redirect to login page after successful signup
     else:
         form = CustomSignupForm()
         
