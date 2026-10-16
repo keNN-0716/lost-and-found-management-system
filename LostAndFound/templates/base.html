@@ -29,6 +29,15 @@
         <h2>Lost and Found Management System</h2>
     </div>
 
+    <!-- Django messages (success / error feedback after actions) -->
+    {% if messages %}
+        <ul class="messages-list">
+            {% for message in messages %}
+                <li class="message-item message-{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <main>
         {% block content %}
         {% endblock %}

@@ -18,4 +18,8 @@ urlpatterns = [
     path('lost_items/', views.lost_items, name='lost_items'),
     path('found_items/', views.found_items, name='found_items'),
     path('search/', views.search_results, name='search_results'),
+
+    # Claim / resolve workflow
+    path('claim/<str:item_type>/<int:item_id>/', views.claim_item, name='claim_item'),
+    path('resolve/<str:item_type>/<int:item_id>/', views.resolve_item, name='resolve_item'),
 ]

@@ -1,11 +1,58 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>User Home Page</h1>
-            <p>Welcome to your user home page</p>
+<div class="lost-items-container">
+    <div class="page-header" style="width: 100%;">
+        <h2 class="section-title">Welcome, {{ user.username }}!</h2>
+
+        <div class="search-container">
+            <form action="{% url 'search_results' %}" method="get">
+                <input type="text" name="q" placeholder="Search lost items...">
+                <button type="submit" class="action-btn upload-trigger-btn">Search</button>
+            </form>
         </div>
     </div>
+    <hr class="divider" style="width: 100%; margin-bottom: 20px;">
+
+    <h3 style="width: 100%; text-align: left;">Items I Reported</h3>
+    {% if my_lost_reports or my_found_reports %}
+        {% for item in my_lost_reports %}
+            <div class="item-card">
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }} <small>(Lost)</small></h3>
+                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                    <p class="item-meta"><strong>Location:</strong> {{ item.location_lost }}</p>
+                    <p class="item-meta"><strong>Date:</strong> {{ item.date_lost }}</p>
+                </div>
+            </div>
+        {% endfor %}
+        {% for item in my_found_reports %}
+            <div class="item-card">
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }} <small>(Found)</small></h3>
+                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                    <p class="item-meta"><strong>Location:</strong> {{ item.location_found }}</p>
+                    <p class="item-meta"><strong>Date:</strong> {{ item.date_found }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message" style="width: 100%;">You haven't reported any items yet.</p>
+    {% endif %}
+
+    <h3 style="width: 100%; text-align: left; margin-top: 30px;">My Claims</h3>
+    {% if my_claims %}
+        {% for item in my_claims %}
+            <div class="item-card">
+                <div class="item-details">
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                    <p class="item-meta"><strong>Status:</strong> {% if item.status == 'Resolved' %}Returned to you!{% else %}Awaiting management verification{% endif %}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message" style="width: 100%;">You haven't claimed any items yet.</p>
+    {% endif %}
 </div>
 {% endblock %}
