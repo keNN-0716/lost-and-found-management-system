@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CustomLoginForm, CustomSignupForm
 from django.db.models import Q
 from .models import LostItem
+from .decorators import management_required
 
 # Search backend for lost and found
 def search_results(request):
@@ -34,7 +36,6 @@ def signup_view(request):
 # Login page for lost and found
 def login_view(request):
     error_message = None
-    
     if request.method == 'POST':
         form = CustomLoginForm(request.POST)
         if form.is_valid():
@@ -44,16 +45,22 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                return redirect('lost_and_found')
+                
+                return redirect('login_redirect') 
             else:
                 error_message = 'Invalid ID number or password.'
     else:
         form = CustomLoginForm()
         
-    return render(request, 'login.html', {
-        'form': form, 
-        'error_message': error_message
-    })
+    return render(request, 'login.html', {'form': form, 'error_message': error_message})
+    
+@login_required
+def login_redirect_view(request):
+
+    if request.user.is_staff or getattr(request.user, 'role', None) == 'Management':
+        return redirect('lost_and_found')
+    else:
+        return redirect('user_home_page')
 
 # Logout page for lost and found
 @csrf_exempt  # Added to allow POST requests without CSRF token for logout
@@ -62,6 +69,7 @@ def logout_view(request):
     return redirect('login')
 # Lost items page for lost and found
 @login_required
+@management_required
 def lost_items(request):
     # 1. Handle Form Submission (Manager uploads an item)
     if request.method == 'POST':
@@ -88,10 +96,19 @@ def lost_items(request):
     return render(request, 'lost_items.html', {'lost_items': lost_items})
 # Home page for lost and found
 @login_required
+@management_required
 def lost_and_found(request):
+    # Enforce role protection explicitly at the view level
+    if not (request.user.is_staff or getattr(request.user, 'role', None) == 'Management'):
+        return HttpResponseForbidden("You do not have permission to access the management panel.")
+        
     return render(request, 'lost_and_found.html')
 
 # Found items page
 @login_required # Pro-Tip: Added protection here too
 def found_items(request):
     return render(request, 'found_items.html')
+
+@login_required
+def user_home_page(request):
+    return render(request, 'user_home_page.html')
