@@ -16,7 +16,12 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return f"{self.username} ({self.role})"
-    
+
+    @property
+    def is_management(self):
+        """True if this user is staff or has the Management role."""
+        return self.is_staff or self.role == self.Roles.MANAGEMENT
+
 
 class ItemStatus(models.TextChoices):
     OPEN = 'Open', 'Open'

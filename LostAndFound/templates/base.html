@@ -12,7 +12,12 @@
         <button class="close-menu" id="closeMenu">✖ Close</button>
         <ul>
             <h4>Navigation</h4>
-            <li><a href="{% url 'lost_and_found' %}">Home</a></li>
+            {% if user.is_management %}
+                <li><a href="{% url 'lost_and_found' %}">Dashboard</a></li>
+                <li><a href="{% url 'user_home_page' %}">My Reports</a></li>
+            {% else %}
+                <li><a href="{% url 'user_home_page' %}">Home</a></li>
+            {% endif %}
             <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
             <li><a href="{% url 'found_items' %}">Found Items</a></li>
             <form action="{% url 'logout' %}" method="POST" style="display: inline;">

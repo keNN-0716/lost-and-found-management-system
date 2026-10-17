@@ -1,9 +1,57 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block content %}
-    <div class="home-page-container">
-        <h1>Welcome to the Lost and Found Management System, "{{ user.username }}"!</h1>
-        <p>Use the navigation menu on the left to view lost and found items.</p>
+<div class="lost-items-container">
+    <div class="page-header" style="width: 100%;">
+        <h2 class="section-title">Management Dashboard</h2>
+        <div class="dashboard-actions">
+            <a href="{% url 'lost_items' %}" class="action-btn upload-trigger-btn">Report Lost Item</a>
+            <a href="{% url 'found_items' %}" class="action-btn upload-trigger-btn">Report Found Item</a>
+        </div>
+    </div>
+    <hr class="divider" style="width: 100%; margin-bottom: 20px;">
+
+    <!-- Overview stat cards -->
+    <div class="stats-grid" style="width: 100%;">
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.total_lost }}</span>
+            <span class="stat-label">Lost Items</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.total_found }}</span>
+            <span class="stat-label">Found Items</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.open }}</span>
+            <span class="stat-label">Open</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.claimed }}</span>
+            <span class="stat-label">Awaiting Verification</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.resolved }}</span>
+            <span class="stat-label">Resolved</span>
+        </div>
     </div>
 
-
+    <!-- Claims awaiting verification -->
+    <h3 style="width: 100%; text-align: left; margin-top: 30px;">Claims Awaiting Verification</h3>
+    {% if pending_claims %}
+        {% for entry in pending_claims %}
+            <div class="item-card">
+                <div class="item-details">
+                    <h3 class="item-name">{{ entry.item.name }} <small>({{ entry.type|title }})</small></h3>
+                    <p class="item-meta"><strong>Claimed by:</strong> {{ entry.item.claimed_by.username }}</p>
+                    <p class="item-meta"><strong>Location:</strong> {{ entry.location }}</p>
+                    <form method="post" action="{% url 'resolve_item' entry.type entry.item.item_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn submit-btn">Mark as Resolved</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message" style="width: 100%;">No claims awaiting verification.</p>
+    {% endif %}
+</div>
 {% endblock %}

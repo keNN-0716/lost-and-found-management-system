@@ -292,3 +292,78 @@ class LogoutTests(TestCase):
         # Session should no longer have an authenticated user
         response = self.client.get(reverse('user_home_page'))
         self.assertEqual(response.status_code, 302)
+
+class RoleLandingPageTests(TestCase):
+    """Each role gets its own landing page and navigation."""
+
+    def setUp(self):
+        self.normal = CustomUser.objects.create_user(
+            username='normalnav', id_number='2026-0020', password='pw12345!'
+        )
+        self.manager = CustomUser.objects.create_user(
+            username='managernav', id_number='2026-0021', password='pw12345!',
+            role=CustomUser.Roles.MANAGEMENT,
+        )
+
+    def test_is_management_property(self):
+        self.assertFalse(self.normal.is_management)
+        self.assertTrue(self.manager.is_management)
+
+    def test_staff_user_is_management(self):
+        staff = CustomUser.objects.create_user(
+            username='staffuser', id_number='2026-0022', password='pw12345!'
+        )
+        staff.is_staff = True
+        staff.save()
+        self.assertTrue(staff.is_management)
+
+    def test_normal_user_nav_links_to_user_home(self):
+        self.client.force_login(self.normal)
+        response = self.client.get(reverse('lost_items'))
+        self.assertContains(response, reverse('user_home_page'))
+        # Normal users must not be pointed to the management dashboard
+        self.assertNotContains(response, reverse('lost_and_found'))
+
+    def test_management_nav_links_to_dashboard(self):
+        self.client.force_login(self.manager)
+        response = self.client.get(reverse('lost_items'))
+        self.assertContains(response, reverse('lost_and_found'))
+        self.assertContains(response, reverse('user_home_page'))
+
+    def test_management_dashboard_shows_stats(self):
+        LostItem.objects.create(
+            name='Dash Lost', description='d',
+            date_lost=date(2026, 10, 6), location_lost='Hall',
+        )
+        FoundItem.objects.create(
+            name='Dash Found', description='d',
+            date_found=date(2026, 10, 6), location_found='Hall',
+        )
+        self.client.force_login(self.manager)
+        response = self.client.get(reverse('lost_and_found'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Management Dashboard')
+        self.assertEqual(response.context['stats']['total_lost'], 1)
+        self.assertEqual(response.context['stats']['total_found'], 1)
+
+    def test_dashboard_lists_pending_claims(self):
+        item = FoundItem.objects.create(
+            name='Pending Claim', description='d',
+            date_found=date(2026, 10, 6), location_found='Hall',
+            status=ItemStatus.CLAIMED, claimed_by=self.normal,
+        )
+        self.client.force_login(self.manager)
+        response = self.client.get(reverse('lost_and_found'))
+        self.assertContains(response, 'Pending Claim')
+        self.assertEqual(len(response.context['pending_claims']), 1)
+        self.assertEqual(response.context['pending_claims'][0]['type'], 'found')
+
+    def test_normal_user_cannot_access_dashboard(self):
+        self.client.force_login(self.normal)
+        response = self.client.get(reverse('lost_and_found'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_root_url_renders_login_page(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'login.html')

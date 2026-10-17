@@ -11,7 +11,7 @@ from .decorators import management_required
 
 def is_management(user):
     """Helper: True if the user is staff or has the Management role."""
-    return user.is_staff or getattr(user, 'role', None) == 'Management'
+    return bool(getattr(user, 'is_management', False))
 
 
 # Search backend for lost and found
@@ -106,12 +106,41 @@ def lost_items(request):
     })
 
 
-# Home page for lost and found
+# Management dashboard (home for the management role)
 @login_required
 @management_required
 def lost_and_found(request):
     # Role protection is enforced by the management_required decorator
-    return render(request, 'lost_and_found.html')
+    lost_qs = LostItem.objects.all()
+    found_qs = FoundItem.objects.all()
+
+    # Claims awaiting verification (claimed but not yet resolved)
+    pending_claims = [
+        {'item': item, 'type': 'lost', 'location': item.location_lost}
+        for item in lost_qs.filter(status=ItemStatus.CLAIMED).order_by('-created_at')
+    ] + [
+        {'item': item, 'type': 'found', 'location': item.location_found}
+        for item in found_qs.filter(status=ItemStatus.CLAIMED).order_by('-created_at')
+    ]
+
+    stats = {
+        'total_lost': lost_qs.count(),
+        'total_found': found_qs.count(),
+        'open': (
+            lost_qs.filter(status=ItemStatus.OPEN).count()
+            + found_qs.filter(status=ItemStatus.OPEN).count()
+        ),
+        'claimed': len(pending_claims),
+        'resolved': (
+            lost_qs.filter(status=ItemStatus.RESOLVED).count()
+            + found_qs.filter(status=ItemStatus.RESOLVED).count()
+        ),
+    }
+
+    return render(request, 'lost_and_found.html', {
+        'stats': stats,
+        'pending_claims': pending_claims,
+    })
 
 
 # Found items page

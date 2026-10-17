@@ -473,3 +473,43 @@ footer {
     border-radius: 4px;
     box-sizing: border-box;
 }
+
+/* Management dashboard */
+.dashboard-actions {
+    display: flex;
+    gap: 10px;
+}
+.dashboard-actions a.action-btn {
+    text-decoration: none;
+    display: inline-block;
+}
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: flex-start;
+}
+.stat-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 18px 22px;
+    min-width: 140px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
