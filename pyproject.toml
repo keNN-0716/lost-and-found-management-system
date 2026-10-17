@@ -1,0 +1,11 @@
+[project]
+name = "lost-and-found-management-system"
+version = "0.1.0"
+description = "Lost and Found Management System built with Django"
+requires-python = ">=3.12"
+dependencies = [
+    "django==6.0.4",
+    "python-decouple>=3.8",
+    "pillow>=11.0",
+    "psycopg[binary]>=3.2",
+]

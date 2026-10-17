@@ -1,11 +1,11 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="lost-items-container">
     <!-- 1. Header & Functional Search Form Row Container -->
     <div class="page-header" style="width: 100%;">
         <h2 class="section-title">Current Lost Items</h2>
-        
+
         <div class="search-container">
             <form action="{% url 'search_results' %}" method="get">
                 <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search lost items...">
@@ -13,13 +13,13 @@
             </form>
         </div>
 
-        <!-- Manager Upload Action Button -->
+        <!-- Report Lost Item Action Button -->
         <button type="button" class="action-btn upload-trigger-btn" onclick="document.getElementById('uploadModal').style.display='flex'">
             Report Lost Item
         </button>
     </div>
     <hr class="divider" style="width: 100%; align-items: center; margin-bottom: 20px;">
-    
+
 
     <!-- 2. Responsive Items Row Grid -->
     {% if lost_items %}
@@ -28,12 +28,28 @@
                 {% if item.image %}
                     <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-preview-img">
                 {% endif %}
-                
+
                 <div class="item-details">
                     <h3 class="item-name">{{ item.name }}</h3>
+                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
                     <p class="item-desc"><strong>Description:</strong> {{ item.description }}</p>
                     <p class="item-meta"><strong>Location:</strong> {{ item.location_lost }}</p>
                     <p class="item-meta"><strong>Date Lost:</strong> {{ item.date_lost }}</p>
+                    {% if item.claimed_by %}
+                        <p class="item-meta"><strong>Claimed by:</strong> {{ item.claimed_by.username }}</p>
+                    {% endif %}
+
+                    {% if item.status == 'Open' %}
+                        <form method="post" action="{% url 'claim_item' 'lost' item.item_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn submit-btn">Claim Item</button>
+                        </form>
+                    {% elif item.status == 'Claimed' and is_management %}
+                        <form method="post" action="{% url 'resolve_item' 'lost' item.item_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn submit-btn">Mark as Resolved</button>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
@@ -42,42 +58,51 @@
     {% endif %}
 </div>
 
-<!-- 3. Manager Portal: Upload Item Modal Popup Layout -->
+<!-- 3. Report Item Modal Popup Layout (backed by LostItemForm) -->
 <div id="uploadModal" class="modal-overlay" onclick="if(event.target == this) this.style.display='none'">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Upload Lost Item</h3>
+            <h3 class="modal-title">Report Lost Item</h3>
             <span class="close-x" onclick="document.getElementById('uploadModal').style.display='none'">&times;</span>
         </div>
-        
+
         <form method="post" enctype="multipart/form-data" action="{% url 'lost_items' %}">
             {% csrf_token %}
-            
+
+            {% if form.non_field_errors %}
+                <div class="form-error">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
+
             <div class="form-group">
                 <label class="form-label">Item Name:</label>
-                <input type="text" name="name" class="form-input" required>
+                {{ form.name }}
+                {% if form.name.errors %}<span class="form-error">{{ form.name.errors|striptags }}</span>{% endif %}
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Location Lost:</label>
-                <input type="text" name="location_lost" class="form-input" required>
+                {{ form.location_lost }}
+                {% if form.location_lost.errors %}<span class="form-error">{{ form.location_lost.errors|striptags }}</span>{% endif %}
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Date Lost:</label>
-                <input type="date" name="date_lost" class="form-input" required>
+                {{ form.date_lost }}
+                {% if form.date_lost.errors %}<span class="form-error">{{ form.date_lost.errors|striptags }}</span>{% endif %}
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Item Image:</label>
-                <input type="file" name="image" class="form-input" accept="image/*">
+                {{ form.image }}
+                {% if form.image.errors %}<span class="form-error">{{ form.image.errors|striptags }}</span>{% endif %}
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Description:</label>
-                <textarea name="description" class="form-textarea" rows="3" required></textarea>
+                {{ form.description }}
+                {% if form.description.errors %}<span class="form-error">{{ form.description.errors|striptags }}</span>{% endif %}
             </div>
-            
+
             <div class="modal-footer">
                 <button type="button" class="action-btn cancel-btn" onclick="document.getElementById('uploadModal').style.display='none'">Cancel</button>
                 <button type="submit" class="action-btn submit-btn">Upload Item</button>
