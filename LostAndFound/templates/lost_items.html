@@ -125,5 +125,9 @@
 
 {% block extra_js %}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        window.MAP_TILE_URL = "{{ tile_url }}";
+        window.MAP_TILE_ATTRIBUTION = "{{ tile_attribution }}";
+    </script>
     <script src="{% static 'js/map-picker.js' %}"></script>
 {% endblock %}

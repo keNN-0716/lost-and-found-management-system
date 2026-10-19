@@ -32,6 +32,10 @@ ALLOWED_HOSTS = config(
     cast=lambda v: [s.strip() for s in v.split(',')],
 )
 
+# CARTO Basemaps API key (free tier). Keep secret - set it in .env only.
+# Used for map/heatmap tiles; falls back to a keyless basemap if unset.
+CARTO_API_KEY = config('CARTO_API_KEY', default='')
+
 
 # Application definition
 
@@ -67,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'LostAndFound.context_processors.map_tiles',
             ],
         },
     },

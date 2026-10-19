@@ -12,10 +12,16 @@
 
     var map = L.map('heatmap').setView(campusCenter, campusZoom);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    var tileUrl = (typeof window.MAP_TILE_URL !== 'undefined' && window.MAP_TILE_URL)
+        ? window.MAP_TILE_URL
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+    var tileAttribution = (typeof window.MAP_TILE_ATTRIBUTION !== 'undefined' && window.MAP_TILE_ATTRIBUTION)
+        ? window.MAP_TILE_ATTRIBUTION
+        : 'Map data &copy; Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors';
+    L.tileLayer(tileUrl, {
         maxZoom: 19,
         subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        attribution: tileAttribution
     }).addTo(map);
 
     // Fit the view to whichever points are shown, so clusters stay in frame.
