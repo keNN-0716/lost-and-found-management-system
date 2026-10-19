@@ -367,3 +367,99 @@ class RoleLandingPageTests(TestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'login.html')
+
+
+class CoordinateAndHeatmapTests(TestCase):
+    """Map coordinates on reports and the campus heatmap page."""
+
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username='mapper', id_number='2026-0030', password='pw12345!'
+        )
+        self.manager = CustomUser.objects.create_user(
+            username='mapmgr', id_number='2026-0031', password='pw12345!',
+            role=CustomUser.Roles.MANAGEMENT,
+        )
+
+    def _valid_lost_payload(self, **extra):
+        data = {
+            'name': 'Calculator',
+            'description': 'Casio',
+            'date_lost': '2026-10-10',
+            'location_lost': 'Canteen',
+        }
+        data.update(extra)
+        return data
+
+    def test_report_saves_coordinates(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('lost_items'),
+                                     self._valid_lost_payload(latitude='13.405900', longitude='123.375800'))
+        self.assertRedirects(response, reverse('lost_items'))
+        item = LostItem.objects.get(name='Calculator')
+        self.assertAlmostEqual(item.latitude, 13.4059, places=4)
+        self.assertAlmostEqual(item.longitude, 123.3758, places=4)
+
+    def test_report_without_coordinates_still_succeeds(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('lost_items'), self._valid_lost_payload())
+        self.assertRedirects(response, reverse('lost_items'))
+        item = LostItem.objects.get(name='Calculator')
+        self.assertIsNone(item.latitude)
+        self.assertIsNone(item.longitude)
+
+    def test_out_of_range_latitude_rejected(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('lost_items'),
+                                     self._valid_lost_payload(latitude='999', longitude='10'))
+        self.assertEqual(response.status_code, 200)  # re-rendered with errors
+        self.assertFalse(LostItem.objects.filter(name='Calculator').exists())
+
+    def test_heatmap_requires_login(self):
+        response = self.client.get(reverse('heatmap'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_heatmap_renders_with_points(self):
+        LostItem.objects.create(
+            name='Lost Pin', description='d', date_lost=date(2026, 10, 10),
+            location_lost='Gym', latitude=13.4059, longitude=123.3758,
+        )
+        FoundItem.objects.create(
+            name='Found Pin', description='d', date_found=date(2026, 10, 10),
+            location_found='Gym', latitude=13.4061, longitude=123.3760,
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('heatmap'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['lost_count'], 1)
+        self.assertEqual(response.context['found_count'], 1)
+        self.assertEqual(response.context['campus_lat'], 13.4059)
+        self.assertContains(response, '13.4059')
+
+    def test_heatmap_filters_by_type(self):
+        LostItem.objects.create(
+            name='Lost Only', description='d', date_lost=date(2026, 10, 10),
+            location_lost='Gym', latitude=13.4, longitude=123.3,
+        )
+        FoundItem.objects.create(
+            name='Found Only', description='d', date_found=date(2026, 10, 10),
+            location_found='Gym', latitude=13.4, longitude=123.3,
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('heatmap') + '?type=lost')
+        self.assertEqual(response.context['lost_count'], 1)
+        self.assertEqual(response.context['found_count'], 0)
+
+    def test_heatmap_excludes_items_without_coordinates(self):
+        LostItem.objects.create(
+            name='No Coords', description='d', date_lost=date(2026, 10, 10),
+            location_lost='Hall',
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('heatmap'))
+        self.assertEqual(response.context['lost_count'], 0)
+
+    def test_heatmap_accessible_to_normal_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('heatmap'))
+        self.assertEqual(response.status_code, 200)

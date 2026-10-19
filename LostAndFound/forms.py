@@ -52,7 +52,7 @@ class CustomSignupForm(UserCreationForm):
 class LostItemForm(forms.ModelForm):
     class Meta:
         model = LostItem
-        fields = ['name', 'description', 'date_lost', 'location_lost', 'image']
+        fields = ['name', 'description', 'date_lost', 'location_lost', 'image', 'latitude', 'longitude']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-input'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
@@ -71,7 +71,7 @@ class LostItemForm(forms.ModelForm):
 class FoundItemForm(forms.ModelForm):
     class Meta:
         model = FoundItem
-        fields = ['name', 'description', 'date_found', 'location_found', 'image']
+        fields = ['name', 'description', 'date_found', 'location_found', 'image', 'latitude', 'longitude']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-input'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),

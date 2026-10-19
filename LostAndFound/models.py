@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
@@ -36,6 +37,15 @@ class LostItem(models.Model):
     date_lost = models.DateField()
     location_lost = models.CharField(max_length=100)
     image = models.ImageField(upload_to='lost_items/', null=True, blank=True)
+    # Optional map coordinates (set by clicking the report map)
+    latitude = models.FloatField(
+        null=True, blank=True,
+        validators=[MinValueValidator(-90), MaxValueValidator(90)]
+    )
+    longitude = models.FloatField(
+        null=True, blank=True,
+        validators=[MinValueValidator(-180), MaxValueValidator(180)]
+    )
     status = models.CharField(
         max_length=20,
         choices=ItemStatus.choices,
@@ -68,6 +78,15 @@ class FoundItem(models.Model):
     date_found = models.DateField()
     location_found = models.CharField(max_length=100)
     image = models.ImageField(upload_to='found_items/', null=True, blank=True)
+    # Optional map coordinates (set by clicking the report map)
+    latitude = models.FloatField(
+        null=True, blank=True,
+        validators=[MinValueValidator(-90), MaxValueValidator(90)]
+    )
+    longitude = models.FloatField(
+        null=True, blank=True,
+        validators=[MinValueValidator(-180), MaxValueValidator(180)]
+    )
     status = models.CharField(
         max_length=20,
         choices=ItemStatus.choices,

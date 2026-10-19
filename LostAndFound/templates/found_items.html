@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
 
 {% block content %}
 <div class="lost-items-container">
@@ -12,7 +16,7 @@
             </form>
         </div>
 
-        <button type="button" class="action-btn upload-trigger-btn" onclick="document.getElementById('uploadModal').style.display='flex'">
+        <button type="button" class="action-btn upload-trigger-btn" onclick="openReportModal()">
             Report Found Item
         </button>
     </div>
@@ -59,7 +63,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">Report Found Item</h3>
-            <span class="close-x" onclick="document.getElementById('uploadModal').style.display='none'">&times;</span>
+            <span class="close-x" onclick="closeReportModal()">&times;</span>
         </div>
 
         <form method="post" enctype="multipart/form-data" action="{% url 'found_items' %}">
@@ -94,16 +98,28 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Mark location on map (click to drop a pin):</label>
+                <div id="reportMap" class="report-map"></div>
+                <input type="hidden" name="latitude" id="id_latitude" value="{{ form.latitude.value|default_if_none:'' }}">
+                <input type="hidden" name="longitude" id="id_longitude" value="{{ form.longitude.value|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Description:</label>
                 {{ form.description }}
                 {% if form.description.errors %}<span class="form-error">{{ form.description.errors|striptags }}</span>{% endif %}
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="action-btn cancel-btn" onclick="document.getElementById('uploadModal').style.display='none'">Cancel</button>
+                <button type="button" class="action-btn cancel-btn" onclick="closeReportModal()">Cancel</button>
                 <button type="submit" class="action-btn submit-btn">Submit Found Item</button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'js/map-picker.js' %}"></script>
 {% endblock %}

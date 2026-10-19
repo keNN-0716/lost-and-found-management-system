@@ -1,0 +1,42 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="lost-items-container">
+    <div class="page-header" style="width: 100%;">
+        <h2 class="section-title">Lost &amp; Found Heatmap</h2>
+
+        <div class="heatmap-toggle">
+            <a href="{% url 'heatmap' %}?type=all" class="toggle-btn {% if point_type == 'all' %}active{% endif %}">All</a>
+            <a href="{% url 'heatmap' %}?type=lost" class="toggle-btn {% if point_type == 'lost' %}active{% endif %}">Lost</a>
+            <a href="{% url 'heatmap' %}?type=found" class="toggle-btn {% if point_type == 'found' %}active{% endif %}">Found</a>
+        </div>
+    </div>
+    <hr class="divider" style="width: 100%; margin-bottom: 20px;">
+
+    <div class="heatmap-legend" style="width: 100%;">
+        <span class="legend-item"><span class="dot dot-lost"></span> Lost ({{ lost_count }})</span>
+        <span class="legend-item"><span class="dot dot-found"></span> Found ({{ found_count }})</span>
+        <span class="legend-note">Warmer areas = places where items are frequently lost or found.</span>
+    </div>
+
+    <div id="heatmap" class="heatmap-map"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+        var campusCenter = [{{ campus_lat }}, {{ campus_lng }}];
+        var campusZoom = {{ campus_zoom }};
+        var lostPoints = {{ lost_points|safe }};
+        var foundPoints = {{ found_points|safe }};
+        var pointType = "{{ point_type }}";
+    </script>
+    <script src="{% static 'js/heatmap.js' %}"></script>
+{% endblock %}

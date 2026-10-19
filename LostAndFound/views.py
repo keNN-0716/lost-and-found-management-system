@@ -7,6 +7,12 @@ from django.db.models import Q
 from .forms import CustomLoginForm, CustomSignupForm, LostItemForm, FoundItemForm
 from .models import LostItem, FoundItem, ItemStatus
 from .decorators import management_required
+import json
+
+# Default map view centered on the CSPC Nabua campus
+CAMPUS_LAT = 13.4059
+CAMPUS_LNG = 123.3758
+CAMPUS_ZOOM = 16
 
 
 def is_management(user):
@@ -232,4 +238,29 @@ def user_home_page(request):
         'my_found_reports': my_found_reports,
         'my_claims': my_claims,
         'is_management': is_management(request.user),
+    })
+
+
+# Heatmap of where items are usually lost / found (centered on CSPC campus)
+@login_required
+def heatmap(request):
+    point_type = request.GET.get("type", "all")
+    if point_type not in ("all", "lost", "found"):
+        point_type = "all"
+
+    lost_qs = LostItem.objects.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+    found_qs = FoundItem.objects.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+
+    lost_points = [[i.latitude, i.longitude] for i in lost_qs] if point_type in ("all", "lost") else []
+    found_points = [[i.latitude, i.longitude] for i in found_qs] if point_type in ("all", "found") else []
+
+    return render(request, "heatmap.html", {
+        "lost_points": json.dumps(lost_points),
+        "found_points": json.dumps(found_points),
+        "lost_count": len(lost_points),
+        "found_count": len(found_points),
+        "point_type": point_type,
+        "campus_lat": CAMPUS_LAT,
+        "campus_lng": CAMPUS_LNG,
+        "campus_zoom": CAMPUS_ZOOM,
     })

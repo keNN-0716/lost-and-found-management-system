@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Lost and Found</title>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <nav class="side-menu" id="sideMenu">
@@ -20,6 +21,7 @@
             {% endif %}
             <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
             <li><a href="{% url 'found_items' %}">Found Items</a></li>
+            <li><a href="{% url 'heatmap' %}">Heatmap</a></li>
             <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="logout-btn" style="margin-top: 390px">
@@ -53,5 +55,6 @@
     </footer>
 
     <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
