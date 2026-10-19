@@ -14,9 +14,10 @@
     var campusCenter = [13.4059, 123.3758];
     var map = L.map('reportMap').setView(campusCenter, 16);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
     }).addTo(map);
 
     var latInput = document.getElementById('id_latitude');

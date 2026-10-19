@@ -12,9 +12,10 @@
 
     var map = L.map('heatmap').setView(campusCenter, campusZoom);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
     }).addTo(map);
 
     // Fit the view to whichever points are shown, so clusters stay in frame.
