@@ -12,7 +12,17 @@
 
     // Centered on the CSPC Nabua campus
     var campusCenter = [13.4059, 123.3758];
-    var map = L.map('reportMap').setView(campusCenter, 16);
+    var mapBounds = (typeof window.MAP_BOUNDS !== 'undefined' && window.MAP_BOUNDS)
+        ? window.MAP_BOUNDS
+        : [[13.3959, 123.3658], [13.4159, 123.3858]];
+    var mapMinZoom = (typeof window.MAP_MIN_ZOOM !== 'undefined' && window.MAP_MIN_ZOOM)
+        ? window.MAP_MIN_ZOOM
+        : 15;
+    var map = L.map('reportMap', {
+        maxBounds: mapBounds,
+        maxBoundsViscosity: 1.0,
+        minZoom: mapMinZoom
+    }).setView(campusCenter, 16);
 
     var tileUrl = (typeof window.MAP_TILE_URL !== 'undefined' && window.MAP_TILE_URL)
         ? window.MAP_TILE_URL

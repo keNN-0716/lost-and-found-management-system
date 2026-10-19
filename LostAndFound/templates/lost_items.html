@@ -128,6 +128,8 @@
     <script>
         window.MAP_TILE_URL = "{{ tile_url }}";
         window.MAP_TILE_ATTRIBUTION = "{{ tile_attribution }}";
+        window.MAP_BOUNDS = {{ campus_bounds }};
+        window.MAP_MIN_ZOOM = {{ campus_min_zoom }};
     </script>
     <script src="{% static 'js/map-picker.js' %}"></script>
 {% endblock %}
