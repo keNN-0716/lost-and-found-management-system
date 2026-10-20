@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Rewards History — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Rewards History{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Your history</h2>
+        <p class="rw-lede">Track points earned, held, and refunded, plus every redemption request.</p>
+    </div>
+    <div class="rw-balance-chip">
+        <span>Balance</span>
+        <strong>{{ account.points_balance }} pts</strong>
+    </div>
+</section>
+
+<nav class="rw-tabs" aria-label="History sections">
+    <a href="?tab=transactions" class="{% if tab == 'transactions' %}is-active{% endif %}">Point transactions</a>
+    <a href="?tab=redemptions" class="{% if tab == 'redemptions' %}is-active{% endif %}">Redemptions</a>
+</nav>
+
+{% if tab == "transactions" %}
+<section class="rw-panel">
+    {% if tx_page.object_list %}
+    <div class="rw-table-wrap">
+        <table class="rw-table">
+            <thead>
+                <tr>
+                    <th scope="col">When</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in tx_page %}
+                <tr>
+                    <td data-label="When">{{ tx.created_at|date:"M j, Y g:i A" }}</td>
+                    <td data-label="Description">{{ tx.reason }}</td>
+                    <td data-label="Type"><span class="rw-kind">{{ tx.get_kind_display }}</span></td>
+                    <td data-label="Points" class="{% if tx.amount > 0 %}is-credit{% else %}is-debit{% endif %}">
+                        {% if tx.amount > 0 %}+{% endif %}{{ tx.amount }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if tx_page.has_other_pages %}
+    <nav class="rw-pagination" aria-label="Transaction pages">
+        {% if tx_page.has_previous %}
+        <a href="?tab=transactions&amp;page={{ tx_page.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ tx_page.number }} of {{ tx_page.paginator.num_pages }}</span>
+        {% if tx_page.has_next %}
+        <a href="?tab=transactions&amp;page={{ tx_page.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="rw-empty">
+        <p>No transactions yet.</p>
+        <p class="rw-muted">Verified returns and redemptions will show up here.</p>
+    </div>
+    {% endif %}
+</section>
+{% else %}
+<section class="rw-panel">
+    {% if red_page.object_list %}
+    <ul class="rw-redemption-cards">
+        {% for r in red_page %}
+        <li class="rw-redemption-card">
+            <div class="rw-redemption-main">
+                <h3>{{ r.reward.name }}</h3>
+                <p class="rw-muted">{{ r.points_spent }} points · {{ r.created_at|date:"M j, Y g:i A" }}</p>
+                {% if r.staff_note %}
+                <p class="rw-note">Staff note: {{ r.staff_note }}</p>
+                {% endif %}
+            </div>
+            <div class="rw-redemption-aside">
+                <span class="rw-status rw-status-{{ r.status }}">{{ r.get_status_display }}</span>
+                {% if r.status == "pending" %}
+                <form method="post" action="{% url 'rewards:cancel' r.pk %}" data-confirm="Cancel this redemption and refund your points?">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                </form>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if red_page.has_other_pages %}
+    <nav class="rw-pagination" aria-label="Redemption pages">
+        {% if red_page.has_previous %}
+        <a href="?tab=redemptions&amp;page={{ red_page.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ red_page.number }} of {{ red_page.paginator.num_pages }}</span>
+        {% if red_page.has_next %}
+        <a href="?tab=redemptions&amp;page={{ red_page.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="rw-empty">
+        <p>No redemptions yet.</p>
+        <a class="btn btn-secondary btn-sm" href="{% url 'rewards:catalog' %}">Browse rewards</a>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+        if (!window.confirm(form.getAttribute("data-confirm"))) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

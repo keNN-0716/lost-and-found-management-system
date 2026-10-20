@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}My Rewards — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}My Rewards{% endblock %}
+
+{% block content %}
+<section class="rw-hero">
+    <div class="rw-hero-copy">
+        <p class="rw-eyebrow">Campus helpers earn points</p>
+        <h2>Welcome back{% if account.nickname %}, {{ account.nickname }}{% endif %}</h2>
+        <p class="rw-lede">
+            Points are awarded only after Management verifies a returned item.
+            Spend them on catalog rewards or climb the helper ranks.
+        </p>
+        <div class="rw-hero-actions">
+            <a class="btn btn-primary" href="{% url 'rewards:catalog' %}">Browse rewards</a>
+            <a class="btn btn-ghost" href="{% url 'rewards:leaderboard' %}">View leaderboard</a>
+        </div>
+    </div>
+    <div class="rw-rank-panel" aria-label="Your rank">
+        <span class="rw-rank-badge rw-rank-{{ progress.current|slugify }}">{{ progress.current }}</span>
+        <dl class="rw-stat-grid">
+            <div>
+                <dt>Spendable</dt>
+                <dd>{{ account.points_balance }} <span>pts</span></dd>
+            </div>
+            <div>
+                <dt>Lifetime earned</dt>
+                <dd>{{ account.lifetime_points }} <span>pts</span></dd>
+            </div>
+        </dl>
+        <div class="rw-progress" role="img" aria-label="Progress toward next rank">
+            {% if progress.next %}
+            <div class="rw-progress-meta">
+                <span>{{ progress.points_to_next }} pts to {{ progress.next }}</span>
+                <span>{{ progress.percent }}%</span>
+            </div>
+            <div class="rw-progress-track">
+                <div class="rw-progress-fill" style="width: {{ progress.percent }}%;"></div>
+            </div>
+            {% else %}
+            <p class="rw-progress-done">You have reached the highest rank — Guardian.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="rw-section">
+    <div class="rw-section-head">
+        <h3>How points work</h3>
+    </div>
+    <ul class="rw-info-row">
+        <li>
+            <strong>Standard return</strong>
+            <span>{{ tier_points.standard }} points</span>
+        </li>
+        <li>
+            <strong>High-value return</strong>
+            <span>{{ tier_points.high_value }} points</span>
+        </li>
+        <li>
+            <strong>Verified by staff</strong>
+            <span>No points until Management confirms</span>
+        </li>
+    </ul>
+</section>
+
+<div class="rw-split">
+    <section class="rw-panel">
+        <div class="rw-section-head">
+            <h3>Recent activity</h3>
+            <a href="{% url 'rewards:history' %}">Full history</a>
+        </div>
+        {% if recent_transactions %}
+        <ul class="rw-timeline">
+            {% for tx in recent_transactions %}
+            <li class="{% if tx.amount > 0 %}is-credit{% else %}is-debit{% endif %}">
+                <div>
+                    <strong>{{ tx.reason }}</strong>
+                    <time datetime="{{ tx.created_at|date:'c' }}">{{ tx.created_at|date:"M j, Y · g:i A" }}</time>
+                </div>
+                <span class="rw-amount">{% if tx.amount > 0 %}+{% endif %}{{ tx.amount }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="rw-empty">
+            <p>No point activity yet.</p>
+            <p class="rw-muted">When Management verifies a return you helped with, it will appear here.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="rw-panel">
+        <div class="rw-section-head">
+            <h3>Recent redemptions</h3>
+            <a href="{% url 'rewards:history' %}?tab=redemptions">View all</a>
+        </div>
+        {% if recent_redemptions %}
+        <ul class="rw-list">
+            {% for r in recent_redemptions %}
+            <li>
+                <div>
+                    <strong>{{ r.reward.name }}</strong>
+                    <span class="rw-muted">{{ r.points_spent }} pts · {{ r.created_at|date:"M j, Y" }}</span>
+                </div>
+                <span class="rw-status rw-status-{{ r.status }}">{{ r.get_status_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="rw-empty">
+            <p>No redemptions yet.</p>
+            <a class="btn btn-secondary btn-sm" href="{% url 'rewards:catalog' %}">Browse the catalog</a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+{% if is_rewards_staff %}
+<section class="rw-staff-callout">
+    <div>
+        <h3>Management tools</h3>
+        <p>Verify returns and review redemption requests from the staff queues.</p>
+    </div>
+    <div class="rw-hero-actions">
+        <a class="btn btn-secondary" href="{% url 'rewards:manage_returns' %}">Verify returns</a>
+        <a class="btn btn-ghost" href="{% url 'rewards:manage_redemptions' %}">Review redemptions</a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

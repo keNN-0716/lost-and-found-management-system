@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Review Redemptions — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Review Redemptions{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Redemption review</h2>
+        <p class="rw-lede">
+            Approve a request when it looks valid, then mark it fulfilled when the reward
+            is handed over. Rejecting refunds points once. Fulfilled redemptions are never refunded.
+            You cannot review your own redemption.
+        </p>
+    </div>
+</section>
+
+<section class="rw-panel">
+    <div class="rw-section-head">
+        <h3>Active queue</h3>
+    </div>
+    {% if queue %}
+    <ul class="rw-manage-list">
+        {% for r in queue %}
+        <li class="rw-manage-card">
+            <div>
+                <h4>{{ r.reward.name }}</h4>
+                <p class="rw-muted">
+                    {{ r.points_spent }} pts held · Student: {{ r.account.user.get_username }}
+                    · Requested {{ r.created_at|date:"M j, Y g:i A" }}
+                </p>
+                <span class="rw-status rw-status-{{ r.status }}">{{ r.get_status_display }}</span>
+            </div>
+            <div class="rw-manage-actions">
+                {% if r.status == "pending" %}
+                <form method="post" action="{% url 'rewards:manage_redemption_approve' r.pk %}" data-confirm="Approve this redemption?">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                {% endif %}
+                {% if r.status == "approved" %}
+                <form method="post" action="{% url 'rewards:manage_redemption_fulfill' r.pk %}" data-confirm="Mark fulfilled? Points will not be refunded.">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm">Fulfill</button>
+                </form>
+                {% endif %}
+                {% if r.status == "pending" or r.status == "approved" %}
+                <form method="post" action="{% url 'rewards:manage_redemption_reject' r.pk %}" data-confirm="Reject and refund points?">
+                    {% csrf_token %}
+                    <input type="hidden" name="note" value="">
+                    <button type="submit" class="btn btn-danger btn-sm">Reject &amp; refund</button>
+                </form>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="rw-empty"><p>No pending or approved redemptions.</p></div>
+    {% endif %}
+</section>
+
+<section class="rw-panel">
+    <div class="rw-section-head">
+        <h3>Recently closed</h3>
+    </div>
+    {% if recent %}
+    <div class="rw-table-wrap">
+        <table class="rw-table">
+            <thead>
+                <tr>
+                    <th>Reward</th>
+                    <th>Points</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in recent %}
+                <tr>
+                    <td>{{ r.reward.name }}</td>
+                    <td>{{ r.points_spent }}</td>
+                    <td><span class="rw-status rw-status-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                    <td>{{ r.updated_at|date:"M j, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="rw-empty"><p class="rw-muted">No closed redemptions yet.</p></div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+        if (!window.confirm(form.getAttribute("data-confirm"))) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

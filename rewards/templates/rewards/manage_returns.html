@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Verify Returns — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Verify Returns{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Return verification queue</h2>
+        <p class="rw-lede">
+            Points are awarded only when you verify a return. Standard =
+            {{ tier_points.standard }} pts · High-value = {{ tier_points.high_value }} pts.
+            You cannot verify a return you are personally involved in.
+        </p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'rewards:manage_return_create' %}">Record a return</a>
+</section>
+
+<section class="rw-panel">
+    <div class="rw-section-head">
+        <h3>Pending verification</h3>
+    </div>
+    {% if pending_returns %}
+    <ul class="rw-manage-list">
+        {% for v in pending_returns %}
+        <li class="rw-manage-card">
+            <div>
+                <h4>{{ v.item_name }}</h4>
+                <p class="rw-muted">
+                    Finder: {{ v.finder.get_username }}
+                    {% if v.owner %}· Owner: {{ v.owner.get_username }}{% endif %}
+                    · {{ v.get_tier_display }} ({{ v.tier_points }} pts)
+                    {% if v.lost_item_id %}· Lost item #{{ v.lost_item_id }}{% endif %}
+                </p>
+                <p class="rw-muted">Recorded {{ v.created_at|date:"M j, Y g:i A" }}</p>
+                {% if v.notes %}<p class="rw-note">{{ v.notes }}</p>{% endif %}
+            </div>
+            <div class="rw-manage-actions">
+                <form method="post" action="{% url 'rewards:manage_return_verify' v.pk %}" data-confirm="Verify this return and award {{ v.tier_points }} points to the finder?">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">Verify &amp; award</button>
+                </form>
+                <form method="post" action="{% url 'rewards:manage_return_reject' v.pk %}" data-confirm="Reject this return? No points will be awarded.">
+                    {% csrf_token %}
+                    <input type="hidden" name="note" value="">
+                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="rw-empty">
+        <p>No pending returns.</p>
+        <a class="btn btn-secondary btn-sm" href="{% url 'rewards:manage_return_create' %}">Record a return</a>
+    </div>
+    {% endif %}
+</section>
+
+<section class="rw-panel">
+    <div class="rw-section-head">
+        <h3>Recently reviewed</h3>
+    </div>
+    {% if recent_returns %}
+    <div class="rw-table-wrap">
+        <table class="rw-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Tier</th>
+                    <th>Status</th>
+                    <th>Points</th>
+                    <th>Reviewed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in recent_returns %}
+                <tr>
+                    <td>{{ v.item_name }}</td>
+                    <td>{{ v.get_tier_display }}</td>
+                    <td><span class="rw-status rw-status-{{ v.status }}">{{ v.get_status_display }}</span></td>
+                    <td>{{ v.points_awarded }}</td>
+                    <td>{% if v.reviewed_at %}{{ v.reviewed_at|date:"M j, Y" }}{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="rw-empty"><p class="rw-muted">No reviewed returns yet.</p></div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+        if (!window.confirm(form.getAttribute("data-confirm"))) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

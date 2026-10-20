@@ -4,40 +4,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CSPC Lost &amp; Found{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>Lost and Found</title>
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <nav class="side-menu" id="sideMenu">
-        <button class="close-menu" id="closeMenu">✖ Close</button>
-        <ul>
-            <h4>Navigation</h4>
-            <li><a href="{% url 'lost_and_found' %}">Home</a></li>
-            <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
-            <li><a href="{% url 'found_items' %}">Found Items</a></li>
-            <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="logout-btn" style="margin-top: 390px">
-                    Log Out
-                </button>
-            </form>
-        </ul>
-    </nav>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <div class="header">
-        <button class="menu-toggle" id="menuToggle">☰ Menu</button>
-        <h2>Lost and Found Management System</h2>
+    <div class="app-shell">
+        <aside class="side-menu" id="sideMenu" aria-label="Main navigation">
+            <div class="nav-brand">
+                <span class="nav-brand-mark" aria-hidden="true">CSPC</span>
+                <div class="nav-brand-text">
+                    <strong>Lost &amp; Found</strong>
+                    <span>Camarines Sur Polytechnic Colleges</span>
+                </div>
+            </div>
+
+            <button type="button" class="close-menu" id="closeMenu" aria-label="Close menu">
+                <span aria-hidden="true">&times;</span> Close
+            </button>
+
+            <nav class="nav-links">
+                <p class="nav-section-label">Browse</p>
+                <ul>
+                    <li>
+                        <a href="{% url 'lost_and_found' %}" class="{% if request.resolver_match.url_name == 'lost_and_found' %}is-active{% endif %}">
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'lost_items' %}" class="{% if request.resolver_match.url_name == 'lost_items' or request.resolver_match.url_name == 'search_results' %}is-active{% endif %}">
+                            Lost Items
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'found_items' %}" class="{% if request.resolver_match.url_name == 'found_items' %}is-active{% endif %}">
+                            Found Items
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="nav-section-label">Rewards</p>
+                <ul>
+                    <li>
+                        <a href="{% url 'rewards:dashboard' %}" class="{% if request.resolver_match.app_name == 'rewards' and request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}">
+                            My Rewards
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'rewards:catalog' %}" class="{% if request.resolver_match.url_name == 'catalog' %}is-active{% endif %}">
+                            Reward Catalog
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'rewards:leaderboard' %}" class="{% if request.resolver_match.url_name == 'leaderboard' %}is-active{% endif %}">
+                            Leaderboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'rewards:history' %}" class="{% if request.resolver_match.url_name == 'history' %}is-active{% endif %}">
+                            History
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'rewards:profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}is-active{% endif %}">
+                            Profile
+                        </a>
+                    </li>
+                </ul>
+
+                {% if is_rewards_staff %}
+                <p class="nav-section-label">Management</p>
+                <ul>
+                    <li>
+                        <a href="{% url 'rewards:manage_returns' %}" class="{% if request.resolver_match.url_name == 'manage_returns' or request.resolver_match.url_name == 'manage_return_create' %}is-active{% endif %}">
+                            Verify Returns
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'rewards:manage_redemptions' %}" class="{% if request.resolver_match.url_name == 'manage_redemptions' %}is-active{% endif %}">
+                            Review Redemptions
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </nav>
+
+            {% if user.is_authenticated %}
+            <div class="nav-footer">
+                <p class="nav-user" title="Signed in">{{ user.get_username }}</p>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Log out</button>
+                </form>
+            </div>
+            {% endif %}
+        </aside>
+
+        <div class="nav-backdrop" id="navBackdrop" hidden></div>
+
+        <div class="app-main">
+            <header class="header">
+                <button type="button" class="menu-toggle" id="menuToggle" aria-controls="sideMenu" aria-expanded="false">
+                    <span class="menu-toggle-icon" aria-hidden="true"></span>
+                    Menu
+                </button>
+                <div class="header-brand">
+                    <span class="header-kicker">CSPC Campus Service</span>
+                    <h1 class="header-title">{% block page_heading %}Lost &amp; Found Management System{% endblock %}</h1>
+                </div>
+            </header>
+
+            {% if messages %}
+            <div class="messages" role="status" aria-live="polite">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <main id="main-content" class="page-content">
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="site-footer">
+                <div class="site-footer-inner">
+                    <p><strong>CSPC Lost &amp; Found</strong> — helping the campus community recover belongings safely.</p>
+                    <p class="site-footer-meta">&copy; {% now "Y" %} Camarines Sur Polytechnic Colleges. Student project platform.</p>
+                </div>
+            </footer>
+        </div>
     </div>
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <footer>
-        <p>&copy; 2026 Lost and Found Management System</p>
-    </footer>
-
     <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

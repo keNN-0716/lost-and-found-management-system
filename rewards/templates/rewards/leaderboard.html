@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Helper Leaderboard{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Campus helpers</h2>
+        <p class="rw-lede">
+            Rankings use public display names only — never student IDs, emails, or usernames.
+            Opt out anytime in your rewards profile.
+        </p>
+    </div>
+</section>
+
+<nav class="rw-tabs" aria-label="Leaderboard period">
+    <a href="?period=all" class="{% if period == 'all' %}is-active{% endif %}">All time</a>
+    <a href="?period=month" class="{% if period == 'month' %}is-active{% endif %}">This month</a>
+</nav>
+
+{% if me %}
+<div class="rw-me-banner" aria-label="Your ranking">
+    <span class="rw-me-rank">#{{ me.rank }}</span>
+    <div>
+        <strong>{{ me.name }}{% if me.is_me %} (you){% endif %}</strong>
+        <span class="rw-muted">{{ me.rank_title }} · {{ me.points }} pts</span>
+    </div>
+</div>
+{% elif not account.show_on_leaderboard %}
+<div class="rw-me-banner is-opted-out">
+    <div>
+        <strong>You are hidden from the leaderboard</strong>
+        <span class="rw-muted">Turn visibility back on in <a href="{% url 'rewards:profile' %}">your profile</a>.</span>
+    </div>
+</div>
+{% endif %}
+
+<section class="rw-panel">
+    {% if entries %}
+    <ol class="rw-leaderboard">
+        {% for entry in entries %}
+        <li class="rw-lb-row {% if entry.rank <= 3 %}is-top-{{ entry.rank }}{% endif %} {% if entry.is_me %}is-me{% endif %}">
+            <span class="rw-lb-rank" aria-label="Rank {{ entry.rank }}">{{ entry.rank }}</span>
+            <div class="rw-lb-identity">
+                <strong>{{ entry.name }}</strong>
+                <span class="rw-muted">{{ entry.rank_title }}</span>
+            </div>
+            <span class="rw-lb-points">{{ entry.points }} <small>pts</small></span>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <div class="rw-empty">
+        <p>No ranked helpers yet.</p>
+        <p class="rw-muted">Once verified returns earn points, the top helpers will appear here.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

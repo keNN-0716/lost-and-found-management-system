@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Reward Catalog — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Reward Catalog{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Browse rewards</h2>
+        <p class="rw-lede">
+            Sample catalog entries for this student project. Redeeming holds your points
+            until Management approves and fulfills the request.
+        </p>
+    </div>
+    <div class="rw-balance-chip" aria-label="Your spendable points">
+        <span>Your balance</span>
+        <strong>{{ account.points_balance }} pts</strong>
+    </div>
+</section>
+
+{% if reward_cards %}
+<div class="rw-catalog-grid">
+    {% for card in reward_cards %}
+    {% with reward=card.reward %}
+    <article class="rw-reward-card {% if not reward.is_available %}is-unavailable{% endif %}">
+        <div class="rw-reward-cost">
+            <span class="rw-cost-value">{{ reward.points_cost }}</span>
+            <span class="rw-cost-label">points</span>
+        </div>
+        <h3>{{ reward.name }}</h3>
+        {% if reward.description %}
+        <p>{{ reward.description }}</p>
+        {% else %}
+        <p class="rw-muted">No description provided.</p>
+        {% endif %}
+        <div class="rw-reward-meta">
+            {% if reward.stock is None %}
+            <span class="rw-stock is-unlimited">Unlimited</span>
+            {% elif reward.stock > 0 %}
+            <span class="rw-stock">{{ reward.stock }} left</span>
+            {% else %}
+            <span class="rw-stock is-out">Out of stock</span>
+            {% endif %}
+            {% if card.shortfall > 0 %}
+            <span class="rw-need">Need {{ card.shortfall }} more pts</span>
+            {% endif %}
+        </div>
+
+        {% if reward.is_available and card.can_afford %}
+        <form method="post" action="{% url 'rewards:redeem' reward.pk %}" class="rw-redeem-form" data-confirm="Spend {{ reward.points_cost }} points on “{{ reward.name }}”? Points stay on hold until staff review.">
+            {% csrf_token %}
+            <input type="hidden" name="idempotency_key" value="{{ card.idempotency_key }}">
+            <button type="submit" class="btn btn-primary btn-block">Redeem</button>
+        </form>
+        {% elif not reward.is_available %}
+        <button type="button" class="btn btn-disabled btn-block" disabled>Unavailable</button>
+        {% else %}
+        <button type="button" class="btn btn-disabled btn-block" disabled>Not enough points</button>
+        {% endif %}
+    </article>
+    {% endwith %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="rw-empty rw-empty-lg">
+    <h3>No rewards listed yet</h3>
+    <p class="rw-muted">Management can add sample rewards in Django Admin. Nothing here is an official CSPC prize.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll(".rw-redeem-form").forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+        var message = form.getAttribute("data-confirm");
+        if (message && !window.confirm(message)) {
+            event.preventDefault();
+            return;
+        }
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Submitting…";
+        }
+    });
+});
+</script>
+{% endblock %}

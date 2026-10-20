@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Rewards Profile — CSPC Lost &amp; Found{% endblock %}
+{% block page_heading %}Rewards Profile{% endblock %}
+
+{% block content %}
+<section class="rw-page-intro">
+    <div>
+        <h2>Public profile settings</h2>
+        <p class="rw-lede">
+            Choose how you appear on the leaderboard. Never use your student ID number as a nickname.
+        </p>
+    </div>
+    <div class="rw-rank-chip">
+        <span class="rw-rank-badge rw-rank-{{ progress.current|slugify }}">{{ progress.current }}</span>
+        <span>{{ account.lifetime_points }} lifetime pts</span>
+    </div>
+</section>
+
+<section class="rw-panel rw-form-panel">
+    <form method="post" class="rw-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.nickname.id_for_label }}">{{ form.nickname.label }}</label>
+            {{ form.nickname }}
+            {% if form.nickname.help_text %}
+            <p class="form-help">{{ form.nickname.help_text }}</p>
+            {% endif %}
+            {% if form.nickname.errors %}
+            <p class="form-error">{{ form.nickname.errors|striptags }}</p>
+            {% endif %}
+            <p class="form-help">Preview: <strong>{{ account.public_name }}</strong></p>
+        </div>
+
+        <div class="form-group rw-checkbox-row">
+            {{ form.show_on_leaderboard }}
+            <label for="{{ form.show_on_leaderboard.id_for_label }}">{{ form.show_on_leaderboard.label }}</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save preferences</button>
+    </form>
+</section>
+{% endblock %}
