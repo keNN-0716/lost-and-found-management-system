@@ -1,58 +1,152 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My desk{% endblock %}
+{% block topbar_title %}My desk{% endblock %}
 
 {% block content %}
-<div class="lost-items-container">
-    <div class="page-header" style="width: 100%;">
-        <h2 class="section-title">Welcome, {{ user.username }}!</h2>
+<section class="welcome">
+  <div class="welcome-copy">
+    <p class="eyebrow">Camarines Sur Polytechnic Colleges</p>
+    <h1>Hello, <em>{{ user.username }}</em>.</h1>
+    <p class="lede">Your reports and claims, kept in one place. Search covers lost-item names, descriptions, and locations.</p>
 
-        <div class="search-container">
-            <form action="{% url 'search_results' %}" method="get">
-                <input type="text" name="q" placeholder="Search lost items...">
-                <button type="submit" class="action-btn upload-trigger-btn">Search</button>
-            </form>
-        </div>
+    <form class="search-bar search-bar-lg" action="{% url 'search_results' %}" method="get" role="search">
+      <span class="search-bar-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      </span>
+      <label class="visually-hidden" for="desk-search">Search lost items</label>
+      <input id="desk-search" type="search" name="q" placeholder="Search lost items…">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="welcome-counts" aria-label="Your activity">
+      <div>
+        <strong>{{ my_lost_reports|length }}</strong>
+        <span>Lost reports</span>
+      </div>
+      <div>
+        <strong>{{ my_found_reports|length }}</strong>
+        <span>Found reports</span>
+      </div>
+      <div>
+        <strong>{{ my_claims|length }}</strong>
+        <span>Claims</span>
+      </div>
     </div>
-    <hr class="divider" style="width: 100%; margin-bottom: 20px;">
+  </div>
 
-    <h3 style="width: 100%; text-align: left;">Items I Reported</h3>
+  <figure class="welcome-plate">
+    <img src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I">
+    <figcaption>
+      <span>Campus</span>
+      Multi-Purpose Building I
+    </figcaption>
+  </figure>
+</section>
+
+<section class="capsules" aria-label="Quick actions">
+  <a class="capsule capsule-deep" href="{% url 'lost_items' %}?report=1">
+    <span class="capsule-kicker">Report</span>
+    <span class="capsule-title">I lost something</span>
+  </a>
+  <a class="capsule capsule-mid" href="{% url 'found_items' %}?report=1">
+    <span class="capsule-kicker">Turn in</span>
+    <span class="capsule-title">I found something</span>
+  </a>
+  <a class="capsule capsule-ice" href="{% url 'lost_items' %}">
+    <span class="capsule-kicker">Browse</span>
+    <span class="capsule-title">Open the board</span>
+  </a>
+</section>
+
+<div class="split">
+  <section class="panel" aria-labelledby="reports-heading">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title" id="reports-heading">Items you reported</h2>
+        <p class="panel-note">Lost and found reports attached to your account.</p>
+      </div>
+      <div class="panel-actions">
+        <a class="btn btn-secondary btn-sm" href="{% url 'lost_items' %}">Lost</a>
+        <a class="btn btn-secondary btn-sm" href="{% url 'found_items' %}">Found</a>
+      </div>
+    </div>
     {% if my_lost_reports or my_found_reports %}
+      <div class="record-scroll">
         {% for item in my_lost_reports %}
-            <div class="item-card">
-                <div class="item-details">
-                    <h3 class="item-name">{{ item.name }} <small>(Lost)</small></h3>
-                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
-                    <p class="item-meta"><strong>Location:</strong> {{ item.location_lost }}</p>
-                    <p class="item-meta"><strong>Date:</strong> {{ item.date_lost }}</p>
-                </div>
+          <article class="record">
+            <div>
+              <h3 class="record-title">{{ item.name }}</h3>
+              <p class="record-meta">
+                <span>{{ item.location_lost }}</span>
+                <span>{{ item.date_lost }}</span>
+              </p>
             </div>
+            <div class="record-tags">
+              <span class="badge badge-lost">Lost</span>
+              <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+            </div>
+          </article>
         {% endfor %}
         {% for item in my_found_reports %}
-            <div class="item-card">
-                <div class="item-details">
-                    <h3 class="item-name">{{ item.name }} <small>(Found)</small></h3>
-                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
-                    <p class="item-meta"><strong>Location:</strong> {{ item.location_found }}</p>
-                    <p class="item-meta"><strong>Date:</strong> {{ item.date_found }}</p>
-                </div>
+          <article class="record">
+            <div>
+              <h3 class="record-title">{{ item.name }}</h3>
+              <p class="record-meta">
+                <span>{{ item.location_found }}</span>
+                <span>{{ item.date_found }}</span>
+              </p>
             </div>
+            <div class="record-tags">
+              <span class="badge badge-found">Found</span>
+              <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+            </div>
+          </article>
         {% endfor %}
+      </div>
     {% else %}
-        <p class="empty-message" style="width: 100%;">You haven't reported any items yet.</p>
+      <div class="empty-state">
+        <div class="empty-orb" aria-hidden="true"></div>
+        <h3 class="empty-state-title">Nothing reported yet</h3>
+        <p class="empty-state-text">When you report a lost or found item, it will show up in this list.</p>
+      </div>
     {% endif %}
+  </section>
 
-    <h3 style="width: 100%; text-align: left; margin-top: 30px;">My Claims</h3>
+  <section class="panel" aria-labelledby="claims-heading">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title" id="claims-heading">Your claims</h2>
+        <p class="panel-note">Management verifies each claim before an item is returned.</p>
+      </div>
+    </div>
     {% if my_claims %}
+      <div class="record-scroll">
         {% for item in my_claims %}
-            <div class="item-card">
-                <div class="item-details">
-                    <h3 class="item-name">{{ item.name }}</h3>
-                    <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
-                    <p class="item-meta"><strong>Status:</strong> {% if item.status == 'Resolved' %}Returned to you!{% else %}Awaiting management verification{% endif %}</p>
-                </div>
+          <article class="record">
+            <div>
+              <h3 class="record-title">{{ item.name }}</h3>
+              <p class="record-meta">
+                {% if item.status == 'Resolved' %}
+                  <span>Marked returned</span>
+                {% else %}
+                  <span>Waiting for verification</span>
+                {% endif %}
+              </p>
             </div>
+            <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+          </article>
         {% endfor %}
+      </div>
     {% else %}
-        <p class="empty-message" style="width: 100%;">You haven't claimed any items yet.</p>
+      <div class="empty-state">
+        <div class="empty-orb" aria-hidden="true"></div>
+        <h3 class="empty-state-title">No claims yet</h3>
+        <p class="empty-state-text">If you recognize a belonging on the board, claim it and track it here.</p>
+        <a class="btn btn-primary btn-sm" href="{% url 'found_items' %}">Browse found items</a>
+      </div>
     {% endif %}
+  </section>
 </div>
 {% endblock %}

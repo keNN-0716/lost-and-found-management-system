@@ -1,168 +1,63 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Lost & Found</title>
-    <style>
-        /* Simple, Clean Reset & Centered Layout */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        /* Card Container Design */
-        .login-card {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-        }
-
-        h2 {
-            margin: 0 0 10px 0;
-            color: #333333;
-            text-align: center;
-        }
-
-        p {
-            color: #666666;
-            font-size: 14px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        /* Error Banner */
-        .error-alert {
-            background-color: #fde8e8;
-            color: #e53e3e;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid #fbd5d5;
-        }
-
-        /* Form Controls Styling */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        label {
-            font-weight: 6px;
-            font-size: 14px;
-            color: #4a5568;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        /* Targets text and password boxes rendered by Django */
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #3182ce;
-        }
-
-        /* Submit Button Action */
-        button[type="submit"] {
-            background-color: #3182ce;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #2b6cb0;
-        }
-
-        /* Footer Link Context */
-        .footer-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #718096;
-        }
-
-        .footer-link a {
-            color: #3182ce;
-            text-decoration: none;
-        }
-
-        .footer-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* Django field generic error items */
-        .field-errors {
-            color: #e53e3e;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — CSPC Lost &amp; Found</title>
+  <link rel="icon" href="{% static 'img/cspc_logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@320;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
+<body class="auth-body">
 
-    <div class="login-card">
-        <h2>Log In</h2>
-        <p>Access the Lost & Found Portal</p>
-
-        {% if error_message %}
-            <div class="error-alert">
-                {{ error_message }}
-            </div>
-        {% endif %}
-
-        <form method="POST">
-            {% csrf_token %} 
-            
-            {% for field in form %}
-                <div>
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }} 
-                    
-                    {% if field.errors %} 
-                        <div class="field-errors">
-                            {{ field.errors|striptags }}
-                        </div> 
-                    {% endif %}
-                </div>
-            {% endfor %} 
-            
-            <button type="submit">Log In</button>
-        </form>
-
-        <div class="footer-link">
-            Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
-        </div>
+<div class="auth-stage">
+  <section class="auth-story" aria-label="About the system">
+    <img class="auth-photo" src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I">
+    <div class="auth-veil"></div>
+    <div class="auth-story-inner">
+      <img class="auth-seal" src="{% static 'img/cspc_logo.png' %}" alt="Camarines Sur Polytechnic Colleges seal">
+      <p class="eyebrow">Camarines Sur Polytechnic Colleges</p>
+      <h1>Lost on campus.<br>Found again.</h1>
+      <p class="lede">Report a missing belonging, turn in something you found, and follow a claim until it is back with its owner.</p>
+      <p class="auth-meta">Nabua, Camarines Sur · Est. 1983</p>
     </div>
+  </section>
 
+  <section class="auth-panel">
+    <div class="auth-card">
+      <p class="eyebrow">Student &amp; management access</p>
+      <h2 class="auth-title">Sign in</h2>
+      <p class="auth-subtitle">Use the ID number you registered with.</p>
+
+      {% if error_message %}
+        <div class="alert alert-error" role="alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+          <span>{{ error_message }}</span>
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="form-error">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Sign in</button>
+      </form>
+
+      <p class="auth-footer-link">New to the desk? <a href="{% url 'signup' %}">Create an account</a></p>
+    </div>
+  </section>
+</div>
+
+<script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>

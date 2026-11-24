@@ -18,35 +18,56 @@ def validate_image(image):
 
 class CustomLoginForm(forms.Form):
     id_number = forms.CharField(
+        label='ID number',
         max_length=20,
         required=True,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter your ID number'})
+            'placeholder': 'e.g. 2024-00123',
+            'autocomplete': 'username',
+        })
     )
     password = forms.CharField(
+        label='Password',
         required=True,
         widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter your password'})
+            'placeholder': 'Your password',
+            'autocomplete': 'current-password',
+        })
     )
 
 
 class CustomSignupForm(UserCreationForm):
     # Users log in with their ID number, so it must be collected at signup
     id_number = forms.CharField(
+        label='ID number',
         max_length=20,
         required=True,
         widget=forms.TextInput(attrs={
-            'placeholder': 'Enter your college/school ID number'})
+            'placeholder': 'Your college ID number',
+            'autocomplete': 'off',
+        })
     )
 
     class Meta(UserCreationForm.Meta):
-        # 1. Point the form explicitly to your CustomUser model
         model = CustomUser
-
-        # 2. Add your custom field to the registration form fields
         fields = UserCreationForm.Meta.fields + ('id_number',)
+
+    field_order = ['username', 'id_number', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'placeholder': 'Choose a username',
+            'autocomplete': 'username',
+        })
+        self.fields['password1'].widget.attrs.update({
+            'placeholder': 'Create a password',
+            'autocomplete': 'new-password',
+        })
+        self.fields['password2'].widget.attrs.update({
+            'placeholder': 'Repeat your password',
+            'autocomplete': 'new-password',
+        })
 
 
 class LostItemForm(forms.ModelForm):
@@ -54,11 +75,11 @@ class LostItemForm(forms.ModelForm):
         model = LostItem
         fields = ['name', 'description', 'date_lost', 'location_lost', 'image']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-input'}),
-            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
-            'date_lost': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
-            'location_lost': forms.TextInput(attrs={'class': 'form-input'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Black Leather Wallet'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe the item — color, size, distinguishing features…'}),
+            'date_lost': forms.DateInput(attrs={'type': 'date'}),
+            'location_lost': forms.TextInput(attrs={'placeholder': 'e.g. Building A, Room 102'}),
+            'image': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
         }
 
     def clean_image(self):
@@ -73,11 +94,11 @@ class FoundItemForm(forms.ModelForm):
         model = FoundItem
         fields = ['name', 'description', 'date_found', 'location_found', 'image']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-input'}),
-            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
-            'date_found': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
-            'location_found': forms.TextInput(attrs={'class': 'form-input'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Blue Umbrella'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe the item — color, size, distinguishing features…'}),
+            'date_found': forms.DateInput(attrs={'type': 'date'}),
+            'location_found': forms.TextInput(attrs={'placeholder': 'e.g. Library entrance'}),
+            'image': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
         }
 
     def clean_image(self):
