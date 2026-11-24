@@ -2,56 +2,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>Lost and Found</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Lost & Found{% endblock %} — CSPC</title>
+  <link rel="icon" href="{% static 'img/cspc_logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@320;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav class="side-menu" id="sideMenu">
-        <button class="close-menu" id="closeMenu">✖ Close</button>
-        <ul>
-            <h4>Navigation</h4>
-            {% if user.is_management %}
-                <li><a href="{% url 'lost_and_found' %}">Dashboard</a></li>
-                <li><a href="{% url 'user_home_page' %}">My Reports</a></li>
-            {% else %}
-                <li><a href="{% url 'user_home_page' %}">Home</a></li>
-            {% endif %}
-            <li><a href="{% url 'lost_items' %}">Lost Items</a></li>
-            <li><a href="{% url 'found_items' %}">Found Items</a></li>
-            <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="logout-btn" style="margin-top: 390px">
-                    Log Out
-                </button>
-            </form>
-        </ul>
-    </nav>
 
-    <div class="header">
-        <button class="menu-toggle" id="menuToggle">☰ Menu</button>
-        <h2>Lost and Found Management System</h2>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="stage">
+  <div class="app-frame">
+
+    <aside class="sidebar" id="appSidebar">
+      <a class="brand" href="{% if user.is_authenticated and user.is_management %}{% url 'lost_and_found' %}{% else %}{% url 'user_home_page' %}{% endif %}">
+        <span class="brand-mark">
+          <img src="{% static 'img/cspc_logo.png' %}" alt="Camarines Sur Polytechnic Colleges seal">
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Lost &amp; Found</span>
+          <span class="brand-sub">CSPC · Nabua</span>
+        </span>
+      </a>
+
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        {% if user.is_authenticated and user.is_management %}
+          <div class="sidebar-section-label">Desk</div>
+          <a href="{% url 'lost_and_found' %}" class="sidebar-link {% if request.resolver_match.url_name == 'lost_and_found' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+            Overview
+          </a>
+          <div class="sidebar-section-label">Records</div>
+        {% else %}
+          <div class="sidebar-section-label">Campus</div>
+          <a href="{% url 'user_home_page' %}" class="sidebar-link {% if request.resolver_match.url_name == 'user_home_page' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+            My desk
+          </a>
+          <div class="sidebar-section-label">Discover</div>
+        {% endif %}
+
+        <a href="{% url 'lost_items' %}" class="sidebar-link {% if request.resolver_match.url_name == 'lost_items' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+          Lost items
+        </a>
+        <a href="{% url 'found_items' %}" class="sidebar-link {% if request.resolver_match.url_name == 'found_items' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10a7 7 0 0 1 14 0c0 5.6-7 10-7 10z"/><circle cx="12" cy="11" r="2.2"/></svg>
+          Found items
+        </a>
+        <a href="{% url 'search_results' %}" class="sidebar-link {% if request.resolver_match.url_name == 'search_results' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/><path d="M8 11h6"/></svg>
+          Search
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        {% if user.is_authenticated %}
+          <div class="sidebar-user">
+            <div class="sidebar-avatar" aria-hidden="true">{{ user.username|first|upper }}</div>
+            <div class="sidebar-user-info">
+              <div class="sidebar-user-name">{{ user.username }}</div>
+              <div class="sidebar-user-role">{% if user.is_management %}Management{% else %}Student{% endif %}</div>
+            </div>
+          </div>
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+              Sign out
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <button class="topbar-mobile-toggle" id="mobileMenuToggle" aria-label="Open navigation" aria-expanded="false" aria-controls="appSidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h12"/></svg>
+        </button>
+        <p class="topbar-title">{% block topbar_title %}CSPC Lost &amp; Found{% endblock %}</p>
+        <div class="topbar-actions">{% block topbar_actions %}{% endblock %}</div>
+      </header>
+
+      <main class="page-content" id="main">
+        {% if messages %}
+          <div class="alerts-wrapper" role="status">
+            {% for message in messages %}
+              <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% else %}alert-info{% endif %}" data-auto-dismiss="5200">
+                {% if message.tags == 'success' %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                {% else %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+                {% endif %}
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="app-footer">
+        <span>CSPC Lost &amp; Found</span>
+        <span>Nabua, Camarines Sur</span>
+      </footer>
     </div>
 
-    <!-- Django messages (success / error feedback after actions) -->
-    {% if messages %}
-        <ul class="messages-list">
-            {% for message in messages %}
-                <li class="message-item message-{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+  </div>
+</div>
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+<div class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="confirm-box">
+    <p class="eyebrow">Please confirm</p>
+    <h2 class="confirm-box-title" id="confirmTitle">Are you sure?</h2>
+    <p class="confirm-box-text" id="confirmMessage">This action cannot be undone.</p>
+    <div class="confirm-box-actions">
+      <button class="btn btn-secondary" id="confirmCancel" type="button">Cancel</button>
+      <button class="btn btn-primary" id="confirmProceed" type="button">Confirm</button>
+    </div>
+  </div>
+</div>
 
-    <footer>
-        <p>&copy; 2026 Lost and Found Management System</p>
-    </footer>
-
-    <script src="{% static 'js/script.js' %}"></script>
+<script src="{% static 'js/script.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

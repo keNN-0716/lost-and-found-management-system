@@ -1,32 +1,80 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<!-- This container now aligns children into multi-row layers -->
-<div class="lost-items-container">
-    <div class="page-header" style="width: 100%;"> <!-- Spans full width above rows -->
-        <h2 class="section-title">Search Results for: "{{ query }}"</h2>
-    </div>
-    <hr class="divider" style="width: 100%;">
+{% block title %}Search{% endblock %}
+{% block topbar_title %}Search{% endblock %}
 
-    {% if results %}
-        {% for item in results %}
-            <div class="item-card">
-                {% if item.image %}
-                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-preview-img">
-                {% endif %}
-                
-                <div class="item-details">
-                    <h3 class="item-name">{{ item.name }}</h3>
-                    <p class="item-desc"><strong>Description:</strong> {{ item.description }}</p>
-                    <p class="item-meta"><strong>Location:</strong> {{ item.location_lost }}</p>
-                    {% if item.date_lost %}
-                        <p class="item-meta"><strong>Date Lost:</strong> {{ item.date_lost }}</p>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+{% block content %}
+<header class="page-intro {% if not query %}page-intro-solo{% endif %}">
+  <div>
+    <p class="eyebrow">Lost items</p>
+    {% if query %}
+      <h1>Results for “{{ query }}”</h1>
+      <p class="lede">
+        {% if results %}
+          {{ results|length }} item{{ results|length|pluralize }} matched the name, description, or location.
+        {% else %}
+          Nothing in the lost-item records matched that search.
+        {% endif %}
+      </p>
     {% else %}
-        <p class="empty-message" style="width: 100%;">No results found matching your criteria.</p>
+      <h1>Search the lost board.</h1>
+      <p class="lede">Look up a name, a detail from the description, or the place it was last seen.</p>
     {% endif %}
-</div>
+  </div>
+  <form class="search-bar search-bar-lg" action="{% url 'search_results' %}" method="get" role="search">
+    <span class="search-bar-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+    </span>
+    <label class="visually-hidden" for="results-search">Search lost items</label>
+    <input id="results-search" type="search" name="q" value="{{ query|default:'' }}" placeholder="Search lost items…">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+</header>
+
+{% if results %}
+  <div class="items-grid">
+    {% for item in results %}
+      <article class="item-card">
+        <div class="item-media">
+          {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}" class="item-card-image">
+          {% else %}
+            <div class="item-card-image-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.4"/><path d="m20 16-4.2-4.2L6 20"/></svg>
+              <span>No photo</span>
+            </div>
+          {% endif %}
+          <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+        </div>
+        <div class="item-card-body">
+          <h2 class="item-card-name">{{ item.name }}</h2>
+          <p class="item-card-desc">{{ item.description }}</p>
+          <div class="item-card-meta">
+            {% if item.location_lost %}<span class="meta-chip">{{ item.location_lost }}</span>{% endif %}
+            {% if item.date_lost %}<span class="meta-chip">Lost {{ item.date_lost }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="item-card-footer">
+          <a class="btn btn-secondary" href="{% url 'lost_items' %}">Open lost board</a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% elif query %}
+  <section class="panel">
+    <div class="empty-state">
+      <div class="empty-orb" aria-hidden="true"></div>
+      <h2 class="empty-state-title">No match for “{{ query }}”</h2>
+      <p class="empty-state-text">Try a shorter name, a color, or the building where it was lost.</p>
+    </div>
+  </section>
+{% else %}
+  <section class="panel search-idle">
+    <div class="empty-state">
+      <div class="empty-orb" aria-hidden="true"></div>
+      <h2 class="empty-state-title">Start with a word</h2>
+      <p class="empty-state-text">Search looks through lost-item names, descriptions, and locations.</p>
+    </div>
+  </section>
+{% endif %}
 {% endblock %}

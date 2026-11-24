@@ -1,57 +1,92 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
+
+{% block title %}Management desk{% endblock %}
+{% block topbar_title %}Management{% endblock %}
+
 {% block content %}
-<div class="lost-items-container">
-    <div class="page-header" style="width: 100%;">
-        <h2 class="section-title">Management Dashboard</h2>
-        <div class="dashboard-actions">
-            <a href="{% url 'lost_items' %}" class="action-btn upload-trigger-btn">Report Lost Item</a>
-            <a href="{% url 'found_items' %}" class="action-btn upload-trigger-btn">Report Found Item</a>
-        </div>
-    </div>
-    <hr class="divider" style="width: 100%; margin-bottom: 20px;">
-
-    <!-- Overview stat cards -->
-    <div class="stats-grid" style="width: 100%;">
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.total_lost }}</span>
-            <span class="stat-label">Lost Items</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.total_found }}</span>
-            <span class="stat-label">Found Items</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.open }}</span>
-            <span class="stat-label">Open</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.claimed }}</span>
-            <span class="stat-label">Awaiting Verification</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.resolved }}</span>
-            <span class="stat-label">Resolved</span>
-        </div>
-    </div>
-
-    <!-- Claims awaiting verification -->
-    <h3 style="width: 100%; text-align: left; margin-top: 30px;">Claims Awaiting Verification</h3>
+<section class="ops">
+  <div class="ops-copy">
+    <p class="eyebrow">Management desk</p>
     {% if pending_claims %}
-        {% for entry in pending_claims %}
-            <div class="item-card">
-                <div class="item-details">
-                    <h3 class="item-name">{{ entry.item.name }} <small>({{ entry.type|title }})</small></h3>
-                    <p class="item-meta"><strong>Claimed by:</strong> {{ entry.item.claimed_by.username }}</p>
-                    <p class="item-meta"><strong>Location:</strong> {{ entry.location }}</p>
-                    <form method="post" action="{% url 'resolve_item' entry.type entry.item.item_id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="action-btn submit-btn">Mark as Resolved</button>
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
+      <h1>{{ pending_claims|length }} claim{{ pending_claims|length|pluralize }} waiting.</h1>
+      <p class="lede">Verify the claimant, hand the item over, then mark the record resolved.</p>
     {% else %}
-        <p class="empty-message" style="width: 100%;">No claims awaiting verification.</p>
+      <h1>The desk is clear.</h1>
+      <p class="lede">No claims are waiting. The counts below are live records in the system.</p>
     {% endif %}
-</div>
+    <div class="ops-links">
+      <a class="btn btn-primary" href="{% url 'lost_items' %}">Lost items</a>
+      <a class="btn btn-secondary" href="{% url 'found_items' %}">Found items</a>
+    </div>
+  </div>
+
+  <div class="meter" aria-label="System summary">
+    <div class="meter-cell">
+      <span class="meter-value">{{ stats.total_lost }}</span>
+      <span class="meter-label">Lost</span>
+    </div>
+    <div class="meter-cell">
+      <span class="meter-value">{{ stats.total_found }}</span>
+      <span class="meter-label">Found</span>
+    </div>
+    <div class="meter-cell">
+      <span class="meter-value">{{ stats.open }}</span>
+      <span class="meter-label">Open</span>
+    </div>
+    <div class="meter-cell {% if stats.claimed %}meter-cell-focus{% endif %}">
+      <span class="meter-value">{{ stats.claimed }}</span>
+      <span class="meter-label">Pending</span>
+    </div>
+    <div class="meter-cell">
+      <span class="meter-value">{{ stats.resolved }}</span>
+      <span class="meter-label">Resolved</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="pending-heading">
+  <div class="panel-head">
+    <div>
+      <h2 class="panel-title" id="pending-heading">Claims awaiting verification</h2>
+      <p class="panel-note">Resolve a claim only after the item has been returned.</p>
+    </div>
+    {% if pending_claims %}
+      <span class="badge badge-claimed">{{ pending_claims|length }} pending</span>
+    {% endif %}
+  </div>
+
+  {% if pending_claims %}
+    <div class="record-scroll">
+      {% for entry in pending_claims %}
+        <article class="claim-row">
+          <div>
+            <h3 class="record-title">
+              {{ entry.item.name }}
+              {% if entry.type == 'lost' %}
+                <span class="badge badge-lost">Lost</span>
+              {% else %}
+                <span class="badge badge-found">Found</span>
+              {% endif %}
+            </h3>
+            <p class="record-meta">
+              <span>Claimed by {{ entry.item.claimed_by.username }}</span>
+              <span>{{ entry.location }}</span>
+            </p>
+          </div>
+          <form method="post" action="{% url 'resolve_item' entry.type entry.item.item_id %}"
+                onsubmit="event.preventDefault(); requestConfirm(this, 'Resolve this claim?', 'Mark “{{ entry.item.name }}” as resolved. This confirms the item has been returned.')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Mark resolved</button>
+          </form>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-orb" aria-hidden="true"></div>
+      <h3 class="empty-state-title">Nothing waiting</h3>
+      <p class="empty-state-text">New claims will appear here as soon as a student submits one.</p>
+    </div>
+  {% endif %}
+</section>
 {% endblock %}
