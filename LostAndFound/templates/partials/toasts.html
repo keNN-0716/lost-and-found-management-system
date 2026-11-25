@@ -1,0 +1,9 @@
+<div class="toasts" id="toasts" role="status" aria-live="polite">
+  {% for message in messages %}
+    <div class="toast {% if message.tags == 'success' %}toast--success{% elif message.tags == 'error' %}toast--error{% else %}toast--info{% endif %}" data-auto-dismiss="5200">
+      <svg class="i toast__icon">{% if message.tags == 'success' %}<use href="#i-check"/>{% elif message.tags == 'error' %}<use href="#i-alert"/>{% else %}<use href="#i-info"/>{% endif %}</svg>
+      <p class="toast__text">{{ message }}</p>
+      <button type="button" class="toast__close" aria-label="Dismiss notification"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+  {% endfor %}
+</div>

@@ -137,9 +137,20 @@ def lost_and_found(request):
         ),
     }
 
+    # Most recent reports across both boards (read-only, for the activity list)
+    recent_items = sorted(
+        [{'item': item, 'type': 'lost', 'location': item.location_lost}
+         for item in lost_qs.order_by('-created_at')[:8]]
+        + [{'item': item, 'type': 'found', 'location': item.location_found}
+           for item in found_qs.order_by('-created_at')[:8]],
+        key=lambda entry: entry['item'].created_at,
+        reverse=True,
+    )[:8]
+
     return render(request, 'lost_and_found.html', {
         'stats': stats,
         'pending_claims': pending_claims,
+        'recent_items': recent_items,
     })
 
 

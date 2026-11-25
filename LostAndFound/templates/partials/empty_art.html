@@ -1,0 +1,41 @@
+{# Empty-state illustration. Usage: {% include 'partials/empty_art.html' with kind='tag' %} #}
+<svg class="art" viewBox="0 0 160 120" role="presentation" aria-hidden="true" focusable="false">
+  <ellipse class="art-glow" cx="80" cy="66" rx="62" ry="40"/>
+  {% if kind == 'tag' %}
+    <path class="art-line art-dash" d="M42 36q0-8 8-8h40l28 30-28 30H50q-8 0-8-8z"/>
+    <circle class="art-line" cx="56" cy="58" r="4.5"/>
+    <path class="art-line art-soft" d="M70 52h26M70 64h17"/>
+    <circle class="art-fill" cx="112" cy="86" r="15"/>
+    <circle class="art-line art-accent" cx="112" cy="86" r="15"/>
+    <path class="art-line art-accent" d="m123.5 97.5 11 11"/>
+  {% elif kind == 'ticket' %}
+    <path class="art-line art-dash" d="M34 34H126V52A8 8 0 0 0 126 68V86H34V68A8 8 0 0 0 34 52Z"/>
+    <path class="art-line art-soft" d="M92 38v6M92 50v6M92 62v6M92 74v6"/>
+    <circle class="art-fill" cx="62" cy="60" r="13"/>
+    <circle class="art-line art-accent" cx="62" cy="60" r="13"/>
+    <path class="art-line art-accent" d="m56.5 60.5 4.2 4.2 7-8.2"/>
+    <path class="art-line art-soft" d="M102 54h14M102 66h9"/>
+  {% elif kind == 'clear' %}
+    <circle class="art-line art-dash" cx="80" cy="62" r="30"/>
+    <circle class="art-fill" cx="80" cy="62" r="20"/>
+    <circle class="art-line art-accent" cx="80" cy="62" r="20"/>
+    <path class="art-line art-accent" d="m71.5 62.5 6.5 6.5 11-13"/>
+    <path class="art-line art-soft" d="M80 18v8M44 36l5.5 5.5M116 36l-5.5 5.5M30 70h8M122 70h8"/>
+  {% elif kind == 'search' %}
+    <circle class="art-fill" cx="76" cy="56" r="26"/>
+    <circle class="art-line art-accent" cx="76" cy="56" r="26"/>
+    <path class="art-line art-accent" d="m95 75 18 18"/>
+    <path class="art-line art-soft" d="M66 56h20M66 64h12"/>
+    <circle class="art-dot" cx="38" cy="92" r="2.2"/><circle class="art-dot" cx="28" cy="98" r="1.6"/><circle class="art-dot" cx="49" cy="87" r="1.4"/>
+  {% elif kind == 'board' %}
+    <rect class="art-line" x="34" y="26" width="92" height="70" rx="8"/>
+    <rect class="art-fill" x="44" y="38" width="24" height="28" rx="3"/>
+    <rect class="art-line art-soft" x="44" y="38" width="24" height="28" rx="3"/>
+    <rect class="art-line art-dash" x="76" y="38" width="24" height="28" rx="3"/>
+    <rect class="art-line art-dash" x="44" y="72" width="24" height="16" rx="3"/>
+    <rect class="art-line art-dash" x="76" y="72" width="24" height="16" rx="3"/>
+    <circle class="art-line art-accent" cx="56" cy="38" r="2.2"/>
+    <path class="art-line art-soft" d="M50 50h12M50 56h8"/>
+    <path class="art-line art-soft" d="M108 38h10M108 46h6"/>
+  {% endif %}
+</svg>

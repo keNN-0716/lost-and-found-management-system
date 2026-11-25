@@ -367,3 +367,27 @@ class RoleLandingPageTests(TestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'login.html')
+
+
+class ManagementDashboardActivityTests(TestCase):
+    """The management dashboard lists the latest reports from both boards."""
+
+    def test_recent_items_in_context_and_confirm_messages_not_inline_js(self):
+        manager = CustomUser.objects.create_user(
+            username='mgr_recent', id_number='MGT-9001', password='pw12345!', role='Management'
+        )
+        LostItem.objects.create(
+            name="Tricky ');alert(1);// name", description='d',
+            date_lost=date(2026, 10, 5), location_lost='Lab', reported_by=manager,
+        )
+        FoundItem.objects.create(
+            name='Found thing', description='d',
+            date_found=date(2026, 10, 6), location_found='Gym', reported_by=manager,
+        )
+        self.client.force_login(manager)
+        response = self.client.get(reverse('lost_and_found'))
+        self.assertEqual(len(response.context['recent_items']), 2)
+        # Item names must never be interpolated into inline JavaScript handlers.
+        response = self.client.get(reverse('lost_items'))
+        self.assertNotContains(response, 'onsubmit=')
+        self.assertContains(response, 'data-confirm-title')

@@ -1,63 +1,29 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign in — CSPC Lost &amp; Found</title>
-  <link rel="icon" href="{% static 'img/cspc_logo.png' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@320;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body class="auth-body">
+{% extends 'base_auth.html' %}
 
-<div class="auth-stage">
-  <section class="auth-story" aria-label="About the system">
-    <img class="auth-photo" src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I">
-    <div class="auth-veil"></div>
-    <div class="auth-story-inner">
-      <img class="auth-seal" src="{% static 'img/cspc_logo.png' %}" alt="Camarines Sur Polytechnic Colleges seal">
-      <p class="eyebrow">Camarines Sur Polytechnic Colleges</p>
-      <h1>Lost on campus.<br>Found again.</h1>
-      <p class="lede">Report a missing belonging, turn in something you found, and follow a claim until it is back with its owner.</p>
-      <p class="auth-meta">Nabua, Camarines Sur · Est. 1983</p>
+{% block title %}Sign in{% endblock %}
+
+{% block pitch %}
+  <p class="auth__headline">Lost on campus.<br>Found again.</p>
+  <p class="auth__lede">Report a missing belonging, turn in something you found, and follow a claim until it is back with its owner.</p>
+{% endblock %}
+
+{% block form_panel %}
+  <h1 class="auth__title">Sign in</h1>
+  <p class="auth__subtitle">Use the ID number you registered with.</p>
+
+  {% if error_message %}
+    <div class="banner banner--error" role="alert">
+      <svg class="i"><use href="#i-alert"/></svg><span>{{ error_message }}</span>
     </div>
-  </section>
+  {% endif %}
 
-  <section class="auth-panel">
-    <div class="auth-card">
-      <p class="eyebrow">Student &amp; management access</p>
-      <h2 class="auth-title">Sign in</h2>
-      <p class="auth-subtitle">Use the ID number you registered with.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      {% include 'partials/field.html' with field=field label=field.label %}
+    {% endfor %}
+    <button type="submit" class="btn btn--primary btn--block btn--lg">Sign in</button>
+  </form>
 
-      {% if error_message %}
-        <div class="alert alert-error" role="alert">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
-          <span>{{ error_message }}</span>
-        </div>
-      {% endif %}
-
-      <form method="post" novalidate>
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="form-group">
-            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-              <div class="form-error">{{ field.errors|striptags }}</div>
-            {% endif %}
-          </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Sign in</button>
-      </form>
-
-      <p class="auth-footer-link">New to the desk? <a href="{% url 'signup' %}">Create an account</a></p>
-    </div>
-  </section>
-</div>
-
-<script src="{% static 'js/script.js' %}"></script>
-</body>
-</html>
+  <p class="auth__switch">New here? <a href="{% url 'signup' %}">Create an account</a></p>
+{% endblock %}

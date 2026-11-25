@@ -1,0 +1,56 @@
+{# One item on the board. Params: item, kind ('lost'|'found'), is_management, search (optional) #}
+<article class="item-card item-card--{{ kind }}" id="{{ kind }}-{{ item.item_id }}" data-status="{{ item.status|lower }}">
+  <div class="item-card__in">
+    <div class="item-card__media{% if not item.image %} is-empty{% endif %}">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" alt="Photo of {{ item.name }}" loading="lazy" decoding="async">
+      {% else %}
+        <div class="item-card__ph">
+          <svg class="i"><use href="#i-tag-{{ kind }}"/></svg>
+          <span>No photo</span>
+        </div>
+      {% endif %}
+      <span class="type-tab type-tab--{{ kind }}"><svg class="i"><use href="#i-tag-{{ kind }}"/></svg>{% if kind == 'lost' %}Lost{% else %}Found{% endif %}</span>
+      <span class="status status--{{ item.status|lower }} item-card__status">{{ item.status }}</span>
+    </div>
+
+    <div class="item-card__body">
+      <h2 class="item-card__name">{{ item.name }}</h2>
+      <p class="item-card__desc">{{ item.description }}</p>
+      <ul class="item-card__meta">
+        {% if kind == 'lost' %}
+          {% if item.location_lost %}<li><svg class="i"><use href="#i-pin"/></svg><span title="{{ item.location_lost }}">{{ item.location_lost }}</span></li>{% endif %}
+          {% if item.date_lost %}<li><svg class="i"><use href="#i-calendar"/></svg><span>Lost {{ item.date_lost|date:"M j, Y" }}</span></li>{% endif %}
+        {% else %}
+          {% if item.location_found %}<li><svg class="i"><use href="#i-pin"/></svg><span title="{{ item.location_found }}">{{ item.location_found }}</span></li>{% endif %}
+          {% if item.date_found %}<li><svg class="i"><use href="#i-calendar"/></svg><span>Found {{ item.date_found|date:"M j, Y" }}</span></li>{% endif %}
+        {% endif %}
+        {% if item.claimed_by %}<li><svg class="i"><use href="#i-user"/></svg><span>Claimed by {{ item.claimed_by.username }}</span></li>{% endif %}
+      </ul>
+    </div>
+
+    <div class="item-card__stub">
+      {% if search %}
+        <a class="btn btn--ghost btn--block" href="{% url 'lost_items' %}">Open lost board</a>
+      {% elif item.status == 'Open' %}
+        <form method="post" action="{% url 'claim_item' kind item.item_id %}"
+              data-confirm-title="Claim this item?"
+              data-confirm-message="You are claiming “{{ item.name }}”. Management will verify your request.">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--primary btn--block">Claim item</button>
+        </form>
+      {% elif item.status == 'Claimed' and is_management %}
+        <form method="post" action="{% url 'resolve_item' kind item.item_id %}"
+              data-confirm-title="Resolve this item?"
+              data-confirm-message="Mark “{{ item.name }}” as resolved and returned to the claimant.">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--success btn--block">Mark resolved</button>
+        </form>
+      {% elif item.status == 'Claimed' %}
+        <p class="stub-note"><svg class="i"><use href="#i-clock"/></svg>Waiting for management to verify this claim.</p>
+      {% else %}
+        <p class="stub-note stub-note--done"><svg class="i"><use href="#i-check"/></svg>This item has been resolved.</p>
+      {% endif %}
+    </div>
+  </div>
+</article>

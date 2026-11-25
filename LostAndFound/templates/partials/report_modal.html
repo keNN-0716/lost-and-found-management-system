@@ -1,0 +1,44 @@
+{# Report form dialog. Params: kind ('lost'|'found'), form #}
+<div class="dialog dialog--form" id="{% if kind == 'lost' %}reportLostModal{% else %}reportFoundModal{% endif %}" role="dialog" aria-modal="true" aria-labelledby="{{ kind }}ModalTitle" aria-hidden="true" {% if form.errors %}data-open-on-load{% endif %}>
+  <div class="dialog__panel dialog__panel--wide">
+    <div class="dialog__head">
+      <div>
+        <h2 class="dialog__title" id="{{ kind }}ModalTitle">{% if kind == 'lost' %}Report a lost item{% else %}Turn in a found item{% endif %}</h2>
+        <p class="dialog__sub">{% if kind == 'lost' %}It appears on the lost board as soon as you submit.{% else %}It appears on the found board so its owner can claim it.{% endif %}</p>
+      </div>
+      <button type="button" class="icon-btn" data-close-dialog aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <form method="post" enctype="multipart/form-data" action="{% if kind == 'lost' %}{% url 'lost_items' %}{% else %}{% url 'found_items' %}{% endif %}">
+      {% csrf_token %}
+      <div class="dialog__body">
+        {% if form.non_field_errors %}<div class="banner banner--error" role="alert">{{ form.non_field_errors|striptags }}</div>{% endif %}
+        {% include 'partials/field.html' with field=form.name label='Item name' %}
+        <div class="field-row">
+          {% if kind == 'lost' %}
+            {% include 'partials/field.html' with field=form.date_lost label='Date lost' %}
+            {% include 'partials/field.html' with field=form.location_lost label='Location' %}
+          {% else %}
+            {% include 'partials/field.html' with field=form.date_found label='Date found' %}
+            {% include 'partials/field.html' with field=form.location_found label='Location' %}
+          {% endif %}
+        </div>
+        {% include 'partials/field.html' with field=form.description label='Description' %}
+        <div class="field">
+          <span class="field__label">Photo<span class="field__hint">optional, 5 MB max</span></span>
+          <div class="upload">
+            {{ form.image }}
+            <svg class="i upload__icon"><use href="#i-upload"/></svg>
+            <div class="upload__text">Drop a photo or click to browse</div>
+            <div class="upload__hint">JPEG, PNG, WebP or GIF</div>
+            <img class="upload__preview" alt="Selected photo preview">
+          </div>
+          {% if form.image.errors %}<p class="field__error form-error" role="alert">{{ form.image.errors|striptags }}</p>{% endif %}
+        </div>
+      </div>
+      <div class="dialog__foot">
+        <button type="button" class="btn btn--ghost" data-close-dialog>Cancel</button>
+        <button type="submit" class="btn btn--primary">Submit report</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}Sign in{% endblock %} — CSPC Lost &amp; Found</title>
+  {% include 'partials/head_common.html' %}
+</head>
+<body class="auth-body">
+{% include 'partials/sprite.html' %}
+
+<div class="auth">
+  <section class="auth__story" aria-label="About the system">
+    <div class="auth__photo" aria-hidden="true">
+      <img src="{% static 'img/cspc_campus.jpg' %}" alt="" fetchpriority="high">
+    </div>
+    <div class="auth__story-inner">
+      <a class="auth__brand" href="{% url 'login' %}">
+        <span class="brand__seal brand__seal--lg"><img src="{% static 'img/cspc_logo.png' %}" alt="" width="56" height="56"></span>
+        <span class="brand__text">
+          <span class="brand__name">Lost &amp; Found</span>
+          <span class="brand__sub">Camarines Sur Polytechnic Colleges</span>
+        </span>
+      </a>
+      <div class="auth__pitch">
+        {% block pitch %}{% endblock %}
+        <ol class="steps" aria-label="How it works">
+          <li><span class="steps__n">1</span><span><strong>Report it</strong>Lost or found, with a photo if you have one.</span></li>
+          <li><span class="steps__n">2</span><span><strong>Staff verify</strong>Management checks each claim.</span></li>
+          <li><span class="steps__n">3</span><span><strong>Get it back</strong>The record is marked resolved.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="auth__panel">
+    <div class="auth__tools">{% include 'partials/theme_toggle.html' %}</div>
+    <div class="auth__form">
+      {% block form_panel %}{% endblock %}
+    </div>
+    <p class="auth__legal">Camarines Sur Polytechnic Colleges, Nabua</p>
+  </section>
+</div>
+
+<script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
