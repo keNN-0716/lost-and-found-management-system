@@ -1,150 +1,179 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static item_extras %}
 
 {% block title %}My desk{% endblock %}
-{% block topbar_title %}My desk{% endblock %}
+{% block topbar_title %}My Desk{% endblock %}
 
 {% block content %}
-<section class="welcome">
-  <div class="welcome-copy">
-    <p class="eyebrow">Camarines Sur Polytechnic Colleges</p>
-    <h1>Hello, <em>{{ user.username }}</em>.</h1>
-    <p class="lede">Your reports and claims, kept in one place. Search covers lost-item names, descriptions, and locations.</p>
+<section class="hero" aria-labelledby="hero-title">
+  <figure class="hero__photo">
+    <img src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I" fetchpriority="high">
+    <figcaption><svg class="i"><use href="#i-pin"/></svg>Multi-Purpose Building I</figcaption>
+  </figure>
 
-    <form class="search-bar search-bar-lg" action="{% url 'search_results' %}" method="get" role="search">
-      <span class="search-bar-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
-      </span>
-      <label class="visually-hidden" for="desk-search">Search lost items</label>
-      <input id="desk-search" type="search" name="q" placeholder="Search lost items…">
-      <button type="submit" class="btn btn-primary">Search</button>
+  <div class="hero__copy">
+    <h1 class="hero__title" id="hero-title">Welcome back, <span class="hero__name">{{ user.username }}</span></h1>
+    <p class="hero__lede">Looking for something? Search the lost board, or start a report below.</p>
+
+    <form class="search search--hero" action="{% url 'search_results' %}" method="get" role="search">
+      <svg class="i search__icon" aria-hidden="true"><use href="#i-search"/></svg>
+      <label class="sr-only" for="desk-search">Search lost items</label>
+      <input id="desk-search" type="search" name="q" placeholder="Search lost items by name, description or place" autocomplete="off" data-search-hotkey>
+      <kbd class="search__kbd" aria-hidden="true">/</kbd>
+      <button type="submit" class="btn btn--primary">Search</button>
     </form>
 
-    <div class="welcome-counts" aria-label="Your activity">
-      <div>
-        <strong>{{ my_lost_reports|length }}</strong>
-        <span>Lost reports</span>
+    <dl class="hero__stats" aria-label="Your activity">
+      {% with n=my_lost_reports|length open=my_lost_reports|count_status:"Open" %}
+      <div class="stat">
+        <dt>Lost reports</dt>
+        <dd><span class="stat__n">{{ n }}</span>
+          <span class="stat__note">{% if n %}<i class="dot dot--open"></i>{{ open }} open{% else %}None yet{% endif %}</span></dd>
       </div>
-      <div>
-        <strong>{{ my_found_reports|length }}</strong>
-        <span>Found reports</span>
+      {% endwith %}
+      {% with n=my_found_reports|length open=my_found_reports|count_status:"Open" %}
+      <div class="stat">
+        <dt>Found reports</dt>
+        <dd><span class="stat__n">{{ n }}</span>
+          <span class="stat__note">{% if n %}<i class="dot dot--open"></i>{{ open }} open{% else %}None yet{% endif %}</span></dd>
       </div>
-      <div>
-        <strong>{{ my_claims|length }}</strong>
-        <span>Claims</span>
+      {% endwith %}
+      {% with n=my_claims|length waiting=my_claims|count_status:"Claimed" %}
+      <div class="stat">
+        <dt>Claims</dt>
+        <dd><span class="stat__n">{{ n }}</span>
+          <span class="stat__note">{% if waiting %}<i class="dot dot--claimed"></i>{{ waiting }} awaiting verification{% elif n %}<i class="dot dot--resolved"></i>None waiting{% else %}None yet{% endif %}</span></dd>
       </div>
-    </div>
+      {% endwith %}
+    </dl>
   </div>
-
-  <figure class="welcome-plate">
-    <img src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I">
-    <figcaption>
-      <span>Campus</span>
-      Multi-Purpose Building I
-    </figcaption>
-  </figure>
 </section>
 
-<section class="capsules" aria-label="Quick actions">
-  <a class="capsule capsule-deep" href="{% url 'lost_items' %}?report=1">
-    <span class="capsule-kicker">Report</span>
-    <span class="capsule-title">I lost something</span>
+<section class="tickets" aria-label="Quick actions">
+  <a class="ticket ticket--lost" href="{% url 'lost_items' %}?report=1">
+    <span class="ticket__stub"><svg class="i"><use href="#i-tag-lost"/></svg></span>
+    <span class="ticket__body">
+      <span class="ticket__title">Report a lost item</span>
+      <span class="ticket__hint">Tell us what went missing</span>
+    </span>
+    <svg class="i ticket__go" aria-hidden="true"><use href="#i-chevron"/></svg>
   </a>
-  <a class="capsule capsule-mid" href="{% url 'found_items' %}?report=1">
-    <span class="capsule-kicker">Turn in</span>
-    <span class="capsule-title">I found something</span>
+  <a class="ticket ticket--found" href="{% url 'found_items' %}?report=1">
+    <span class="ticket__stub"><svg class="i"><use href="#i-tag-found"/></svg></span>
+    <span class="ticket__body">
+      <span class="ticket__title">Turn in a found item</span>
+      <span class="ticket__hint">Help it reach its owner</span>
+    </span>
+    <svg class="i ticket__go" aria-hidden="true"><use href="#i-chevron"/></svg>
   </a>
-  <a class="capsule capsule-ice" href="{% url 'lost_items' %}">
-    <span class="capsule-kicker">Browse</span>
-    <span class="capsule-title">Open the board</span>
+  <a class="ticket ticket--board" href="{% url 'lost_items' %}">
+    <span class="ticket__stub"><svg class="i"><use href="#i-board"/></svg></span>
+    <span class="ticket__body">
+      <span class="ticket__title">Browse the board</span>
+      <span class="ticket__hint">See everything reported</span>
+    </span>
+    <svg class="i ticket__go" aria-hidden="true"><use href="#i-chevron"/></svg>
   </a>
 </section>
 
 <div class="split">
   <section class="panel" aria-labelledby="reports-heading">
-    <div class="panel-head">
+    <header class="panel__head">
       <div>
-        <h2 class="panel-title" id="reports-heading">Items you reported</h2>
-        <p class="panel-note">Lost and found reports attached to your account.</p>
+        <h2 class="panel__title" id="reports-heading">Items you reported</h2>
+        <p class="panel__note">Lost and found reports attached to your account.</p>
       </div>
-      <div class="panel-actions">
-        <a class="btn btn-secondary btn-sm" href="{% url 'lost_items' %}">Lost</a>
-        <a class="btn btn-secondary btn-sm" href="{% url 'found_items' %}">Found</a>
+      <div class="panel__actions">
+        <a class="btn btn--ghost btn--sm" href="{% url 'lost_items' %}">Lost board</a>
+        <a class="btn btn--ghost btn--sm" href="{% url 'found_items' %}">Found board</a>
       </div>
-    </div>
+    </header>
     {% if my_lost_reports or my_found_reports %}
-      <div class="record-scroll">
+      <div class="records">
         {% for item in my_lost_reports %}
-          <article class="record">
-            <div>
-              <h3 class="record-title">{{ item.name }}</h3>
-              <p class="record-meta">
-                <span>{{ item.location_lost }}</span>
-                <span>{{ item.date_lost }}</span>
-              </p>
-            </div>
-            <div class="record-tags">
-              <span class="badge badge-lost">Lost</span>
-              <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
-            </div>
-          </article>
+          <a class="record" href="{% url 'lost_items' %}#lost-{{ item.item_id }}">
+            <span class="record__thumb record__thumb--lost">
+              {% if item.image %}<img src="{{ item.image.url }}" alt="" loading="lazy">{% else %}<svg class="i"><use href="#i-tag-lost"/></svg>{% endif %}
+            </span>
+            <span class="record__main">
+              <span class="record__title">{{ item.name }}</span>
+              <span class="record__meta">
+                <span class="type-label type-label--lost">Lost</span>
+                <span class="record__loc">{{ item.location_lost }}</span>
+                <span>{{ item.date_lost|date:"M j, Y" }}</span>
+              </span>
+            </span>
+            <span class="status status--{{ item.status|lower }}">{{ item.status }}</span>
+            <svg class="i record__go" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </a>
         {% endfor %}
         {% for item in my_found_reports %}
-          <article class="record">
-            <div>
-              <h3 class="record-title">{{ item.name }}</h3>
-              <p class="record-meta">
-                <span>{{ item.location_found }}</span>
-                <span>{{ item.date_found }}</span>
-              </p>
-            </div>
-            <div class="record-tags">
-              <span class="badge badge-found">Found</span>
-              <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
-            </div>
-          </article>
+          <a class="record" href="{% url 'found_items' %}#found-{{ item.item_id }}">
+            <span class="record__thumb record__thumb--found">
+              {% if item.image %}<img src="{{ item.image.url }}" alt="" loading="lazy">{% else %}<svg class="i"><use href="#i-tag-found"/></svg>{% endif %}
+            </span>
+            <span class="record__main">
+              <span class="record__title">{{ item.name }}</span>
+              <span class="record__meta">
+                <span class="type-label type-label--found">Found</span>
+                <span class="record__loc">{{ item.location_found }}</span>
+                <span>{{ item.date_found|date:"M j, Y" }}</span>
+              </span>
+            </span>
+            <span class="status status--{{ item.status|lower }}">{{ item.status }}</span>
+            <svg class="i record__go" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </a>
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state">
-        <div class="empty-orb" aria-hidden="true"></div>
-        <h3 class="empty-state-title">Nothing reported yet</h3>
-        <p class="empty-state-text">When you report a lost or found item, it will show up in this list.</p>
+      <div class="empty">
+        {% include 'partials/empty_art.html' with kind='tag' %}
+        <h3 class="empty__title">Nothing reported yet</h3>
+        <p class="empty__text">When you report a lost or found item, it shows up here so you can follow it.</p>
+        <div class="empty__actions">
+          <a class="btn btn--primary btn--sm" href="{% url 'lost_items' %}?report=1">Report lost item</a>
+          <a class="btn btn--ghost btn--sm" href="{% url 'found_items' %}?report=1">Turn in found item</a>
+        </div>
       </div>
     {% endif %}
   </section>
 
   <section class="panel" aria-labelledby="claims-heading">
-    <div class="panel-head">
+    <header class="panel__head">
       <div>
-        <h2 class="panel-title" id="claims-heading">Your claims</h2>
-        <p class="panel-note">Management verifies each claim before an item is returned.</p>
+        <h2 class="panel__title" id="claims-heading">Your claims</h2>
+        <p class="panel__note">Management verifies each claim before an item is returned.</p>
       </div>
-    </div>
+    </header>
     {% if my_claims %}
-      <div class="record-scroll">
+      <div class="records">
         {% for item in my_claims %}
-          <article class="record">
-            <div>
-              <h3 class="record-title">{{ item.name }}</h3>
-              <p class="record-meta">
+          <div class="record record--static">
+            <span class="record__thumb record__thumb--claim">
+              {% if item.image %}<img src="{{ item.image.url }}" alt="" loading="lazy">{% else %}<svg class="i"><use href="#i-tag"/></svg>{% endif %}
+            </span>
+            <span class="record__main">
+              <span class="record__title">{{ item.name }}</span>
+              <span class="record__meta">
                 {% if item.status == 'Resolved' %}
-                  <span>Marked returned</span>
+                  <span class="record__state record__state--done"><svg class="i"><use href="#i-check"/></svg>Marked returned</span>
                 {% else %}
-                  <span>Waiting for verification</span>
+                  <span class="record__state"><svg class="i"><use href="#i-clock"/></svg>Waiting for verification</span>
                 {% endif %}
-              </p>
-            </div>
-            <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
-          </article>
+              </span>
+            </span>
+            <span class="status status--{{ item.status|lower }}">{{ item.status }}</span>
+          </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state">
-        <div class="empty-orb" aria-hidden="true"></div>
-        <h3 class="empty-state-title">No claims yet</h3>
-        <p class="empty-state-text">If you recognize a belonging on the board, claim it and track it here.</p>
-        <a class="btn btn-primary btn-sm" href="{% url 'found_items' %}">Browse found items</a>
+      <div class="empty">
+        {% include 'partials/empty_art.html' with kind='ticket' %}
+        <h3 class="empty__title">No claims yet</h3>
+        <p class="empty__text">If you recognize a belonging on the board, claim it and track it here.</p>
+        <div class="empty__actions">
+          <a class="btn btn--primary btn--sm" href="{% url 'found_items' %}">Browse found items</a>
+        </div>
       </div>
     {% endif %}
   </section>

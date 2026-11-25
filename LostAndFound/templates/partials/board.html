@@ -1,0 +1,43 @@
+{% load item_extras %}
+{# Item board. Params: kind ('lost'|'found'), items. Uses context: form, is_management #}
+<header class="page-head">
+  <div class="page-head__copy">
+    <h1 class="page-head__title">{% if kind == 'lost' %}Missing on campus{% else %}Waiting to be claimed{% endif %}</h1>
+    <p class="page-head__lede">{% if kind == 'lost' %}Belongings students have reported lost. If one is yours, submit a claim.{% else %}Things turned in around campus. Recognize yours? Claim it and wait for verification.{% endif %}</p>
+  </div>
+  <form class="search" action="{% url 'search_results' %}" method="get" role="search">
+    <svg class="i search__icon" aria-hidden="true"><use href="#i-search"/></svg>
+    <label class="sr-only" for="{{ kind }}-search">Search lost items</label>
+    <input id="{{ kind }}-search" type="search" name="q" placeholder="Search lost items" autocomplete="off" data-search-hotkey>
+    <button type="submit" class="btn btn--primary btn--sm">Search</button>
+  </form>
+</header>
+
+{% if items %}
+  <div class="toolbar">
+    <div class="segmented" data-filter-bar role="group" aria-label="Filter by status">
+      <button type="button" class="segmented__btn is-active" data-filter="all" aria-pressed="true">All<span class="count">{{ items|length }}</span></button>
+      <button type="button" class="segmented__btn" data-filter="open" aria-pressed="false"><i class="dot dot--open"></i>Open<span class="count">{{ items|count_status:"Open" }}</span></button>
+      <button type="button" class="segmented__btn" data-filter="claimed" aria-pressed="false"><i class="dot dot--claimed"></i>Claimed<span class="count">{{ items|count_status:"Claimed" }}</span></button>
+      <button type="button" class="segmented__btn" data-filter="resolved" aria-pressed="false"><i class="dot dot--resolved"></i>Resolved<span class="count">{{ items|count_status:"Resolved" }}</span></button>
+    </div>
+  </div>
+  <p class="filter-empty" data-filter-empty>No {{ kind }} items with this status.</p>
+
+  <div class="items-grid" data-filter-group>
+    {% for item in items %}
+      {% include 'partials/item_card.html' with item=item kind=kind %}
+    {% endfor %}
+  </div>
+{% else %}
+  <section class="panel">
+    <div class="empty empty--page">
+      {% include 'partials/empty_art.html' with kind='board' %}
+      <h2 class="empty__title">{% if kind == 'lost' %}No lost items yet{% else %}No found items yet{% endif %}</h2>
+      <p class="empty__text">{% if kind == 'lost' %}Be the first to report something missing on campus.{% else %}Found something on campus? Turn it in so its owner can claim it.{% endif %}</p>
+      <div class="empty__actions">
+        <button type="button" class="btn btn--primary" data-open-dialog="{% if kind == 'lost' %}reportLostModal{% else %}reportFoundModal{% endif %}">{% if kind == 'lost' %}Report lost item{% else %}Turn in found item{% endif %}</button>
+      </div>
+    </div>
+  </section>
+{% endif %}

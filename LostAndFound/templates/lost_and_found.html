@@ -1,92 +1,120 @@
 {% extends 'base.html' %}
+{% load item_extras %}
 
-{% block title %}Management desk{% endblock %}
-{% block topbar_title %}Management{% endblock %}
+{% block title %}Management Dashboard{% endblock %}
+{% block topbar_title %}Management Dashboard{% endblock %}
 
 {% block content %}
-<section class="ops">
-  <div class="ops-copy">
-    <p class="eyebrow">Management desk</p>
+<header class="page-head page-head--ops">
+  <div class="page-head__copy">
     {% if pending_claims %}
-      <h1>{{ pending_claims|length }} claim{{ pending_claims|length|pluralize }} waiting.</h1>
-      <p class="lede">Verify the claimant, hand the item over, then mark the record resolved.</p>
+      <h1 class="page-head__title">{{ pending_claims|length }} claim{{ pending_claims|length|pluralize }} waiting for verification</h1>
+      <p class="page-head__lede">Verify the claimant, hand the item over, then mark the record resolved.</p>
     {% else %}
-      <h1>The desk is clear.</h1>
-      <p class="lede">No claims are waiting. The counts below are live records in the system.</p>
+      <h1 class="page-head__title">The desk is clear</h1>
+      <p class="page-head__lede">No claims are waiting. The counts below are live records in the system.</p>
     {% endif %}
-    <div class="ops-links">
-      <a class="btn btn-primary" href="{% url 'lost_items' %}">Lost items</a>
-      <a class="btn btn-secondary" href="{% url 'found_items' %}">Found items</a>
-    </div>
   </div>
-
-  <div class="meter" aria-label="System summary">
-    <div class="meter-cell">
-      <span class="meter-value">{{ stats.total_lost }}</span>
-      <span class="meter-label">Lost</span>
-    </div>
-    <div class="meter-cell">
-      <span class="meter-value">{{ stats.total_found }}</span>
-      <span class="meter-label">Found</span>
-    </div>
-    <div class="meter-cell">
-      <span class="meter-value">{{ stats.open }}</span>
-      <span class="meter-label">Open</span>
-    </div>
-    <div class="meter-cell {% if stats.claimed %}meter-cell-focus{% endif %}">
-      <span class="meter-value">{{ stats.claimed }}</span>
-      <span class="meter-label">Pending</span>
-    </div>
-    <div class="meter-cell">
-      <span class="meter-value">{{ stats.resolved }}</span>
-      <span class="meter-label">Resolved</span>
-    </div>
+  <div class="page-head__actions">
+    <a class="btn btn--primary" href="{% url 'lost_items' %}"><svg class="i"><use href="#i-tag-lost"/></svg>Lost items</a>
+    <a class="btn btn--ghost" href="{% url 'found_items' %}"><svg class="i"><use href="#i-tag-found"/></svg>Found items</a>
   </div>
-</section>
+</header>
 
-<section class="panel" aria-labelledby="pending-heading">
-  <div class="panel-head">
-    <div>
-      <h2 class="panel-title" id="pending-heading">Claims awaiting verification</h2>
-      <p class="panel-note">Resolve a claim only after the item has been returned.</p>
-    </div>
+<dl class="kpis" aria-label="System summary">
+  <div class="kpi kpi--lost"><dt>Lost reports</dt><dd>{{ stats.total_lost }}</dd></div>
+  <div class="kpi kpi--found"><dt>Found reports</dt><dd>{{ stats.total_found }}</dd></div>
+  <div class="kpi kpi--open"><dt>Open items</dt><dd>{{ stats.open }}</dd></div>
+  <div class="kpi kpi--claimed {% if stats.claimed %}is-alert{% endif %}"><dt>Pending claims</dt><dd>{{ stats.claimed }}</dd></div>
+  <div class="kpi kpi--resolved"><dt>Resolved</dt><dd>{{ stats.resolved }}</dd></div>
+</dl>
+
+<div class="split split--ops">
+  <section class="panel" aria-labelledby="pending-heading" id="pending">
+    <header class="panel__head">
+      <div>
+        <h2 class="panel__title" id="pending-heading">Claims awaiting verification</h2>
+        <p class="panel__note">Resolve a claim only after the item has been returned.</p>
+      </div>
+      {% if pending_claims %}<span class="status status--claimed">{{ pending_claims|length }} pending</span>{% endif %}
+    </header>
+
     {% if pending_claims %}
-      <span class="badge badge-claimed">{{ pending_claims|length }} pending</span>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th scope="col">Item</th><th scope="col">Claimed by</th><th scope="col"><span class="sr-only">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for entry in pending_claims %}
+              <tr>
+                <td data-label="Item">
+                  <a class="cell-item" href="{% if entry.type == 'lost' %}{% url 'lost_items' %}#lost-{{ entry.item.item_id }}{% else %}{% url 'found_items' %}#found-{{ entry.item.item_id }}{% endif %}">
+                    <span class="record__thumb record__thumb--{{ entry.type }}">
+                      {% if entry.item.image %}<img src="{{ entry.item.image.url }}" alt="" loading="lazy">{% elif entry.type == 'lost' %}<svg class="i"><use href="#i-tag-lost"/></svg>{% else %}<svg class="i"><use href="#i-tag-found"/></svg>{% endif %}
+                    </span>
+                    <span class="cell-item__text">
+                      <span class="record__title">{{ entry.item.name }}</span>
+                      <span class="cell-item__meta"><span class="type-label type-label--{{ entry.type }}">{% if entry.type == 'lost' %}Lost{% else %}Found{% endif %}</span><span class="record__loc">{{ entry.location }}</span></span>
+                    </span>
+                  </a>
+                </td>
+                <td data-label="Claimed by"><span class="cell-user"><span class="mini-avatar" aria-hidden="true">{{ entry.item.claimed_by.username|first|upper }}</span>{{ entry.item.claimed_by.username }}</span></td>
+                <td class="table__action">
+                  <form method="post" action="{% url 'resolve_item' entry.type entry.item.item_id %}"
+                        data-confirm-title="Resolve this claim?"
+                        data-confirm-message="Mark “{{ entry.item.name }}” as resolved. This confirms the item has been returned.">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--success btn--sm"><svg class="i"><use href="#i-check"/></svg>Mark resolved</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty">
+        {% include 'partials/empty_art.html' with kind='clear' %}
+        <h3 class="empty__title">Nothing waiting</h3>
+        <p class="empty__text">New claims appear here as soon as a student submits one.</p>
+      </div>
     {% endif %}
-  </div>
+  </section>
 
-  {% if pending_claims %}
-    <div class="record-scroll">
-      {% for entry in pending_claims %}
-        <article class="claim-row">
-          <div>
-            <h3 class="record-title">
-              {{ entry.item.name }}
-              {% if entry.type == 'lost' %}
-                <span class="badge badge-lost">Lost</span>
-              {% else %}
-                <span class="badge badge-found">Found</span>
-              {% endif %}
-            </h3>
-            <p class="record-meta">
-              <span>Claimed by {{ entry.item.claimed_by.username }}</span>
-              <span>{{ entry.location }}</span>
-            </p>
-          </div>
-          <form method="post" action="{% url 'resolve_item' entry.type entry.item.item_id %}"
-                onsubmit="event.preventDefault(); requestConfirm(this, 'Resolve this claim?', 'Mark “{{ entry.item.name }}” as resolved. This confirms the item has been returned.')">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">Mark resolved</button>
-          </form>
-        </article>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-orb" aria-hidden="true"></div>
-      <h3 class="empty-state-title">Nothing waiting</h3>
-      <p class="empty-state-text">New claims will appear here as soon as a student submits one.</p>
-    </div>
-  {% endif %}
-</section>
+  <section class="panel" aria-labelledby="recent-heading">
+    <header class="panel__head">
+      <div>
+        <h2 class="panel__title" id="recent-heading">Latest reports</h2>
+        <p class="panel__note">The most recent lost and found records.</p>
+      </div>
+    </header>
+    {% if recent_items %}
+      <div class="records">
+        {% for entry in recent_items %}
+          <a class="record" href="{% if entry.type == 'lost' %}{% url 'lost_items' %}#lost-{{ entry.item.item_id }}{% else %}{% url 'found_items' %}#found-{{ entry.item.item_id }}{% endif %}">
+            <span class="record__thumb record__thumb--{{ entry.type }}">
+              {% if entry.item.image %}<img src="{{ entry.item.image.url }}" alt="" loading="lazy">{% elif entry.type == 'lost' %}<svg class="i"><use href="#i-tag-lost"/></svg>{% else %}<svg class="i"><use href="#i-tag-found"/></svg>{% endif %}
+            </span>
+            <span class="record__main">
+              <span class="record__title">{{ entry.item.name }}</span>
+              <span class="record__meta">
+                <span class="type-label type-label--{{ entry.type }}">{% if entry.type == 'lost' %}Lost{% else %}Found{% endif %}</span>
+                <span class="record__loc">{{ entry.location }}</span>
+                <span>{{ entry.item.created_at|short_since }}</span>
+              </span>
+            </span>
+            <span class="status status--{{ entry.item.status|lower }}">{{ entry.item.status }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        {% include 'partials/empty_art.html' with kind='board' %}
+        <h3 class="empty__title">No reports yet</h3>
+        <p class="empty__text">Lost and found reports will be listed here as they come in.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

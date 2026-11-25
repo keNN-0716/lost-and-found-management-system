@@ -1,0 +1,6 @@
+{# Label + widget + errors. Usage: include with field=form.x label='...' hint='...' #}
+<div class="field">
+  <label class="field__label" for="{{ field.id_for_label }}">{{ label }}{% if hint %}<span class="field__hint">{{ hint }}</span>{% endif %}</label>
+  {{ field }}
+  {% if field.errors %}<p class="field__error form-error" role="alert">{{ field.errors|striptags }}</p>{% endif %}
+</div>

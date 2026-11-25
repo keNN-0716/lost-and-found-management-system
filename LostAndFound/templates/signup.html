@@ -1,66 +1,41 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create account — CSPC Lost &amp; Found</title>
-  <link rel="icon" href="{% static 'img/cspc_logo.png' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@320;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body class="auth-body">
+{% extends 'base_auth.html' %}
 
-<div class="auth-stage">
-  <section class="auth-story" aria-label="About the system">
-    <img class="auth-photo" src="{% static 'img/cspc_campus.jpg' %}" alt="CSPC Multi-Purpose Building I">
-    <div class="auth-veil"></div>
-    <div class="auth-story-inner">
-      <img class="auth-seal" src="{% static 'img/cspc_logo.png' %}" alt="Camarines Sur Polytechnic Colleges seal">
-      <p class="eyebrow">Camarines Sur Polytechnic Colleges</p>
-      <h1>A desk for the whole campus.</h1>
-      <p class="lede">Register once with your ID number. After that, reporting, browsing, and claiming stay in one place.</p>
-      <p class="auth-meta">Nabua, Camarines Sur · Est. 1983</p>
+{% block title %}Create account{% endblock %}
+
+{% block pitch %}
+  <p class="auth__headline">A desk for<br>the whole campus.</p>
+  <p class="auth__lede">Register once with your ID number. After that, reporting, browsing and claiming stay in one place.</p>
+{% endblock %}
+
+{% block form_panel %}
+  <h1 class="auth__title">Create your account</h1>
+  <p class="auth__subtitle">Your ID number is what you will use to sign in.</p>
+
+  {% if form.errors %}
+    <div class="banner banner--error" role="alert">
+      <svg class="i"><use href="#i-alert"/></svg><span>Please fix the highlighted fields before continuing.</span>
     </div>
-  </section>
+  {% endif %}
 
-  <section class="auth-panel">
-    <div class="auth-card auth-card-wide">
-      <p class="eyebrow">Registration</p>
-      <h2 class="auth-title">Create your account</h2>
-      <p class="auth-subtitle">Your ID number is what you will use to sign in.</p>
+  <form method="post" action="{% url 'signup' %}" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field{% if field.errors %} has-error{% endif %}">
+        <label class="field__label" for="{{ field.id_for_label }}">
+          {{ field.label }}
+          {% if not field.field.required %}<span class="field__hint">optional</span>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}
+          <div class="field__help">{{ field.help_text|safe }}</div>
+        {% endif %}
+        {% if field.errors %}
+          <p class="field__error form-error" role="alert">{{ field.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn--primary btn--block btn--lg">Create account</button>
+  </form>
 
-      {% if form.errors %}
-        <div class="form-error-banner" role="alert">Please fix the highlighted fields before continuing.</div>
-      {% endif %}
-
-      <form method="post" action="{% url 'signup' %}" novalidate>
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="form-group">
-            <label class="form-label" for="{{ field.id_for_label }}">
-              {{ field.label }}
-              {% if not field.field.required %}<span class="form-label-hint">optional</span>{% endif %}
-            </label>
-            {{ field }}
-            {% if field.help_text %}
-              <div class="form-hint">{{ field.help_text|safe }}</div>
-            {% endif %}
-            {% if field.errors %}
-              <div class="form-error">{{ field.errors|striptags }}</div>
-            {% endif %}
-          </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Create account</button>
-      </form>
-
-      <p class="auth-footer-link">Already registered? <a href="{% url 'login' %}">Sign in</a></p>
-    </div>
-  </section>
-</div>
-
-<script src="{% static 'js/script.js' %}"></script>
-</body>
-</html>
+  <p class="auth__switch">Already registered? <a href="{% url 'login' %}">Sign in</a></p>
+{% endblock %}
